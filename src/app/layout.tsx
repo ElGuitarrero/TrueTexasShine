@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { Playfair_Display } from "next/font/google";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -11,6 +12,11 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  variable: '--font-playfair',
+  display: 'swap'
+})
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -22,10 +28,13 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
+
+
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${playfair.variable} antialiased`}
       >
         {children}
       </body>
