@@ -27,7 +27,7 @@ export default function Hero() {
       {/* Image Section */}
       <div className="md:w-1/2 flex  justify-center items-center">
         <Image
-          src="/images/personas.png"
+          src="/images/personas.webp"
           width={700}
           height={700}
           alt="Happy customers smiling"

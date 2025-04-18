@@ -1,6 +1,6 @@
 export default function TestimonialsSection() {
   return (
-    <section className="py-16 bg-[#FFFAFA] text-[#4A2C2A]" id="testimonials">
+    <section className="py-16 bg-[#fff4f4] text-[#4A2C2A]" id="testimonials">
       <div className="max-w-5xl mx-auto px-6 text-center">
         <h2 className="text-3xl font-bold mb-12">What Our Clients Say</h2>
 

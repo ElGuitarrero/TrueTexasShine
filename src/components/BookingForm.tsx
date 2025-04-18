@@ -225,15 +225,6 @@ export default function BookingForm({ fechas, onSubmit }: BookingFormProps) {
 						<option value="consultation">Consultation</option>
 					</select>
 				</div>
-				{/* <button
-					type="button"
-					onClick={() => setShowAdvanced(!showAdvanced)}
-					className="text-sm text-pink-600 hover:underline"
-				>
-					{showAdvanced
-						? "▲ Hide Advanced Options"
-						: "▼ Show Advanced Options"}
-				</button> */}
 
 				<div className="space-y-5 p-5 border border-[#F7CAC9] bg-[#FFF0F2] rounded-lg">
 					<div className="grid sm:grid-cols-2 gap-4">
@@ -265,32 +256,39 @@ export default function BookingForm({ fechas, onSubmit }: BookingFormProps) {
 
 					<div className="grid sm:grid-cols-2 gap-4">
 						<div>
-							<label className="text-sm">
-								🛏 Bedrooms ({formData.numBedrooms})
+							<label className="text-sm block mb-1">
+								🛏 Bedrooms
 							</label>
-							<input
-								type="range"
+							<select
 								name="numBedrooms"
-								min="1"
-								max="5"
 								value={formData.numBedrooms}
 								onChange={handleInputChange}
-								className="w-full"
-							/>
+								className="w-full border border-[#DCC5C5] p-2 rounded"
+							>
+								{[1, 2, 3, 4, 5].map((num) => (
+									<option key={num} value={num}>
+										{num} Bedroom{num > 1 ? "s" : ""}
+									</option>
+								))}
+							</select>
 						</div>
+
 						<div>
-							<label className="text-sm">
-								🛁 Bathrooms ({formData.numBathrooms})
+							<label className="text-sm block mb-1">
+								🛁 Bathrooms
 							</label>
-							<input
-								type="range"
+							<select
 								name="numBathrooms"
-								min="1"
-								max="5"
 								value={formData.numBathrooms}
 								onChange={handleInputChange}
-								className="w-full"
-							/>
+								className="w-full border border-[#DCC5C5] p-2 rounded"
+							>
+								{[1, 2, 3, 4, 5].map((num) => (
+									<option key={num} value={num}>
+										{num} Bathroom{num > 1 ? "s" : ""}
+									</option>
+								))}
+							</select>
 						</div>
 					</div>
 

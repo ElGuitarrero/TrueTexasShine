@@ -92,7 +92,18 @@ const WeeklyCalendar = () => {
 			return;
 		}
 
-		if (isBooked(start, end)) {
+		if (isPast(start, hour)) {
+			Swal.fire({
+				title: "This time has already passed",
+				text: "You can't book a slot in the past. Please choose a future time.",
+				icon: "error",
+				iconColor: "oklch(59.2% .249 .584)",
+				confirmButtonText: "Got it",
+			});
+			return;
+		}
+
+		if (isBooked(start, end) || isPast(start, hour)) {
 			Swal.fire({
 				title: "Already Booked",
 				text: "This timeslot is already booked",
@@ -235,38 +246,44 @@ const WeeklyCalendar = () => {
 	const InformacionSeleccionada = () => (
 		<div className="h-full w-full flex items-center">
 			<div className="text-gray-800 h-full w-full flex flex-col items-center bg-[#fff6f8] rounded border border-gray-300 justify-center">
-				{selectedRange && (
-					<div className="flex w-full flex-col items-center px-5 py-4 drop-shadow-md justify-center gap-3">
-						<div>
-							<p className="font-semibold">Selected Range:</p>
-							<p className="">
-								{format(selectedRange.start, "EEEE, MMM dd")}
-								<br />
-								{formatHour(
-									selectedRange.start.getHours() +
-										selectedRange.start.getMinutes() / 60
-								)}{" "}
-								–{" "}
-								{formatHour(
-									selectedRange.end.getHours() +
-										selectedRange.end.getMinutes() / 60
-								)}
-							</p>
-						</div>
+				<div className="flex w-full flex-col items-center px-5 py-4 drop-shadow-md justify-center gap-3">
+					{selectedRange ? (
+						<>
+							<div>
+								<p className="font-semibold">Selected Range:</p>
+								<p className="">
+									{format(
+										selectedRange.start,
+										"EEEE, MMM dd"
+									)}
+									<br />
+									{formatHour(
+										selectedRange.start.getHours() +
+											selectedRange.start.getMinutes() /
+												60
+									)}{" "}
+									–{" "}
+									{formatHour(
+										selectedRange.end.getHours() +
+											selectedRange.end.getMinutes() / 60
+									)}
+								</p>
+							</div>
 
-						<div className="w-full">
-							<button
-								onClick={() => {
-									setBooking(selectedRange);
-									router.push("/booking/details");
-								}}
-								className="px-4 w-full py-2 bg-[#F7CAC9] text-[#4A2C2A] rounded-md shadow hover:bg-[#FBB9B8] transition cursor-pointer"
-							>
-								Confirm Booking
-							</button>
-						</div>
-					</div>
-				)}
+							<div className="w-full">
+								<button
+									onClick={() => {
+										setBooking(selectedRange);
+										router.push("/booking/details");
+									}}
+									className="px-4 w-full py-2 bg-[#F7CAC9] text-[#4A2C2A] rounded-md shadow hover:bg-[#FBB9B8] transition cursor-pointer"
+								>
+									Confirm Booking
+								</button>
+							</div>
+						</>
+					) : (<p>Please select the hours that you want us to work </p>)}
+				</div>
 			</div>
 		</div>
 	);
@@ -384,11 +401,11 @@ const WeeklyCalendar = () => {
 					</div>
 
 					{/* Info seleccionada */}
-					{selectedRange && (
+					
 						<div className="w-full md:basis-1/5">
 							<InformacionSeleccionada />
 						</div>
-					)}
+					
 				</div>
 			</div>
 		</div>
