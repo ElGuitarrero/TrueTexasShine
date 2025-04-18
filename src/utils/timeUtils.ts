@@ -1,5 +1,5 @@
 
-import { format, addMinutes, startOfWeek, addDays, setHours, setMinutes } from 'date-fns'
+import { format, startOfWeek, addDays, setHours, setMinutes } from 'date-fns'
 
 export function generateTimeSlots(start = 8, end = 17, interval = 60) {
     const slots = []
