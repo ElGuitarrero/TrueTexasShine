@@ -5,7 +5,7 @@ export default function Navbar() {
 	return (
 		<header className="w-full px-6 py-4 bg-white shadow-md flex justify-between items-center sticky top-0 z-50">
 			<Link href="/">
-				<span className="text-2xl font-playfair text-[#E75480] font-semibold cursor-pointer">
+				<span className="text-2xl text-[#E75480] font-semibold cursor-pointer" style={{fontFamily: 'var(--font-playfair)'}}>
 					True Texas Shine
 				</span>
 			</Link>

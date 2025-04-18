@@ -3,7 +3,8 @@ import Link from "next/link";
 
 export default function Hero() {
   return (
-    <main className="min-h-screen bg-[#FFFAFA] text-[#4A2C2A] flex flex-col-reverse md:flex-row items-center justify-between px-6 md:px-24 py-12 gap-10">
+    <main className="min-h-screen bg-[#FFFAFA] text-[#4A2C2A] flex flex-col-reverse md:flex-row items-center justify-between px-6 md:px-24 py-12 gap-10"
+        style={{fontFamily: "var(--font-playfair)"}}>
       
       {/* Text Section */}
       <div className="md:w-1/2 flex flex-col items-center md:items-start gap-6 text-center md:text-left">
