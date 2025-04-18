@@ -1,378 +1,376 @@
-'use client'
+/* Código actualizado con la paleta visual de True Texas Shine */
+
+"use client";
 import { useRouter } from "next/navigation";
-// BookingForm.tsx
-
 import { useState } from "react";
-
+import Swal from "sweetalert2";
 
 interface BasicBookingInfo {
-  name: string;
-  phone: number;
-  email: string;
-  location: string;
-  service: "deep cleaning" | "consultation" | "office" | "general cleaning";
-  notes: string;
-  termsAccepted: boolean;
+	name: string;
+	phone: number;
+	email: string;
+	location: string;
+	service: "deep cleaning" | "consultation" | "office" | "general cleaning";
+	notes: string;
+	termsAccepted: boolean;
 }
 
 interface AdvancedBookingInfo {
-  hasPets: boolean;
-  propertyType: "house" | "apartment" | "office";
-  numBedrooms: number;
-  numBathrooms: number;
-  preferredLanguage: string;
-  entryInstructions: string;
-  allowPhotos: boolean;
+	hasPets: boolean;
+	propertyType: "house" | "apartment" | "office";
+	numBedrooms: number;
+	numBathrooms: number;
+	preferredLanguage: string;
+	entryInstructions: string;
+	allowPhotos: boolean;
 }
 
 type BookingFormProps = {
-  fechas: { start: Date; end: Date } | null;
-  onSubmit: (booking: {
-    name: string;
-    phone: string;
-    notes: string;
-    start: Date;
-    end: Date;
-  }) => void;
+	fechas: { start: Date; end: Date } | null;
+	onSubmit: (booking: {
+		name: string;
+		phone: string;
+		notes: string;
+		start: Date;
+		end: Date;
+	}) => void;
 };
 
-
-
 export default function BookingForm({ fechas, onSubmit }: BookingFormProps) {
+	// const [showAdvanced, setShowAdvanced] = useState(false);
+	const [formData, setFormData] = useState<
+		BasicBookingInfo & Partial<AdvancedBookingInfo>
+	>({
+		name: "",
+		phone: 0,
+		email: "",
+		location: "",
+		service: "general cleaning",
+		notes: "",
+		termsAccepted: false,
+		hasPets: false,
+		propertyType: "house",
+		numBedrooms: 1,
+		numBathrooms: 1,
+		preferredLanguage: "en",
+		entryInstructions: "",
+		allowPhotos: false,
+	});
 
-  const [showAdvanced, setShowAdvanced] = useState(false);
-  // const [fechas, setFechas] = useState<Fechas>({ start: new Date(), end: new Date() })
-  const [formData, setFormData] = useState<BasicBookingInfo & Partial<AdvancedBookingInfo>>({
-    name: "",
-    phone: 0,
-    email: "",
-    location: "",
-    service: "general cleaning",
-    notes: "",
-    termsAccepted: false,
-    // Advanced fields (optional)
-    hasPets: false,
-    propertyType: "house",
-    numBedrooms: 1,
-    numBathrooms: 1,
-    preferredLanguage: "en",
-    entryInstructions: "",
-    allowPhotos: false
-  });
-  const router = useRouter()
+	const router = useRouter();
 
+	const handleInputChange = (
+		e: React.ChangeEvent<
+			HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+		>
+	) => {
+		const { name, value, type } = e.target;
+		setFormData((prev) => ({
+			...prev,
+			[name]:
+				type === "checkbox"
+					? (e.target as HTMLInputElement).checked
+					: value,
+		}));
+	};
 
-  // ┌──────────────────────────────────────────┐
-  // │ Funciones despues de declaraciones                      
-  // └──────────────────────────────────────────┘
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
-    }));
-  };
+	const handleSubmit = (e: React.FormEvent) => {
+		e.preventDefault();
+		if (!fechas || !formData.termsAccepted) return;
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!fechas || !formData.termsAccepted) return;
+		onSubmit({
+			name: formData.name,
+			phone: formData.phone.toString(),
+			notes: formData.notes,
+			start: fechas.start,
+			end: fechas.end,
+		});
 
-    onSubmit({
-      name: formData.name,
-      phone: formData.phone.toString(),
-      notes: formData.notes,
-      start: fechas.start,
-      end: fechas.end,
-    });
-  };
+		Swal.fire({
+			icon: "success",
+			title: "Appointment Requested",
+			text: "We'll confirm your booking shortly!",
+			confirmButtonColor: "#F7CAC9",
+		});
+	};
 
-  const estiloDeInput = "w-full border border-gray-300 p-2 rounded"
+	const inputClass = "w-full border border-[#DCC5C5] p-2 rounded";
 
-  return (
-    <form onSubmit={handleSubmit} className="flex text-black flex-col gap-4 p-6 rounded-xl bg-white sm:drop-shadow-xl ">
+	return (
+		<form
+			onSubmit={handleSubmit}
+			className="flex inset-shadow-sm flex-col gap-5 p-6 rounded-xl bg-[#ffff] text-[#4A2C2A] max-w-2xl mx-auto shadow-md"
+		>
+			<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+				<button
+					type="button"
+					onClick={() => router.back()}
+					className="bg-[#F7CAC9] hover:bg-[#FBB9B8] px-4 py-2 rounded text-sm sm:text-base"
+				>
+					← Back
+				</button>
 
-      {/* Titulo y boton */}
-      <div className="flex flex-col sm:flex-row gap-3">
+				<h2 className="text-2xl font-bold text-center sm:text-left w-full">
+					Book a Time Slot
+				</h2>
+			</div>
 
-        {/* Button */}
-        <div className="sm:absolute sm:left-5">
-          <button onClick={() => router.back()} className="bg-pink-200 px-3 py-1 rounded cursor-pointer hover:bg-pink-300">
-            Volver
-          </button>
-        </div>
+			{fechas && (
+				<div className="grid sm:grid-cols-3 gap-4 text-sm">
+					{["Start", "End"].map((label, i) => {
+						const date = i === 0 ? fechas.start : fechas.end;
+						return (
+							<div
+								key={label}
+								className="bg-[#F7CAC9] p-3 rounded shadow text-center"
+							>
+								<h3 className="font-semibold">{label}</h3>
+								<p>{date.toLocaleDateString()}</p>
+								<p>{date.toLocaleTimeString()}</p>
+							</div>
+						);
+					})}
+					<div className="bg-[#F7CAC9] p-3 rounded shadow text-center">
+						<h3 className="font-semibold">Duration</h3>
+						<p>
+							{Math.floor(
+								(fechas.end.getTime() -
+									fechas.start.getTime()) /
+									(1000 * 60)
+							)}{" "}
+							minutes
+						</p>
+					</div>
+				</div>
+			)}
 
-        {/* Titulo */}
-        <div className="w-full flex justify-center">
-          <h2 className="text-2xl text-center font-bold">Book a Time Slot</h2>
-        </div>
+			<div className="space-y-3">
+				{/* 👤 Full Name */}
+				<div>
+					<label className="text-sm flex items-center gap-2">
+						👤 Full Name
+					</label>
+					<input
+						type="text"
+						name="name"
+						value={formData.name}
+						onChange={handleInputChange}
+						className={inputClass}
+						required
+					/>
+				</div>
 
-      </div>
+				{/* 📞 Phone */}
+				<div>
+					<label className="text-sm flex items-center gap-2">
+						📞 Phone
+					</label>
+					<input
+						type="tel"
+						name="phone"
+						value={formData.phone || ""}
+						onChange={handleInputChange}
+						className={inputClass}
+						required
+					/>
+				</div>
 
-      {fechas && (
+				{/* 📧 Email */}
+				<div>
+					<label className="text-sm flex items-center gap-2">
+						📧 Email
+					</label>
+					<input
+						type="email"
+						name="email"
+						value={formData.email}
+						onChange={handleInputChange}
+						className={inputClass}
+						required
+					/>
+				</div>
 
-        <>
-          <div className="flex max-sm:hidden justify-evenly">
+				{/* 📍 Address */}
+				<div>
+					<label className="text-sm flex items-center gap-2">
+						📍 Full Address
+					</label>
+					<input
+						type="text"
+						name="location"
+						value={formData.location}
+						onChange={handleInputChange}
+						className={inputClass}
+						required
+					/>
+				</div>
 
-            <div className="text-sm text-gray-600 bg-pink-100 drop-shadow-md p-3 rounded">
-              <div>
-                <div className="text-xl text-center font-semibold">
-                  Start
-                </div>
+				{/* 🧹 Service */}
+				<div>
+					<label className="text-sm flex items-center gap-2">
+						🧹 Service
+					</label>
+					<select
+						name="service"
+						value={formData.service}
+						onChange={handleInputChange}
+						className={inputClass}
+						required
+					>
+						<option value="general cleaning">
+							General Cleaning
+						</option>
+						<option value="deep cleaning">Deep Cleaning</option>
+						<option value="office">Office</option>
+						<option value="consultation">Consultation</option>
+					</select>
+				</div>
+				{/* <button
+					type="button"
+					onClick={() => setShowAdvanced(!showAdvanced)}
+					className="text-sm text-pink-600 hover:underline"
+				>
+					{showAdvanced
+						? "▲ Hide Advanced Options"
+						: "▼ Show Advanced Options"}
+				</button> */}
 
-                <div className="">
-                  <div className="text-center text-md">{fechas.start.getMonth()}/{fechas.start.getDate()}</div>
-                  <div className="text-md">
-                    {fechas.start.toLocaleTimeString()}
-                  </div>
-                </div>
+				<div className="space-y-5 p-5 border border-[#F7CAC9] bg-[#FFF0F2] rounded-lg">
+					<div className="grid sm:grid-cols-2 gap-4">
+						<div>
+							<label className="text-sm">🏠 Property Type</label>
+							<select
+								name="propertyType"
+								value={formData.propertyType}
+								onChange={handleInputChange}
+								className={inputClass}
+							>
+								<option value="house">House</option>
+								<option value="apartment">Apartment</option>
+								<option value="office">Office</option>
+							</select>
+						</div>
 
-              </div>
-            </div>
+						<div className="flex items-center gap-2 mt-6 sm:mt-[30px]">
+							<span className="text-lg">🐶</span>
+							<input
+								type="checkbox"
+								name="hasPets"
+								checked={formData.hasPets}
+								onChange={handleInputChange}
+							/>
+							<label className="text-sm">Has Pets?</label>
+						</div>
+					</div>
 
-            <div className="text-sm text-gray-600 bg-pink-100 drop-shadow-md p-3 rounded">
-              <div>
-                <div className="text-xl text-center font-semibold">
-                  End
-                </div>
+					<div className="grid sm:grid-cols-2 gap-4">
+						<div>
+							<label className="text-sm">
+								🛏 Bedrooms ({formData.numBedrooms})
+							</label>
+							<input
+								type="range"
+								name="numBedrooms"
+								min="1"
+								max="5"
+								value={formData.numBedrooms}
+								onChange={handleInputChange}
+								className="w-full"
+							/>
+						</div>
+						<div>
+							<label className="text-sm">
+								🛁 Bathrooms ({formData.numBathrooms})
+							</label>
+							<input
+								type="range"
+								name="numBathrooms"
+								min="1"
+								max="5"
+								value={formData.numBathrooms}
+								onChange={handleInputChange}
+								className="w-full"
+							/>
+						</div>
+					</div>
 
-                <div className="">
-                  <div className="text-center text-md">{fechas.end.getMonth()}/{fechas.end.getDate()}</div>
-                  <div className="text-md">
-                    {fechas.end.toLocaleTimeString()}
-                  </div>
-                </div>
+					<div className="grid sm:grid-cols-2 gap-4">
+						<div>
+							<label className="text-sm">
+								🌐 Preferred Language
+							</label>
+							<select
+								name="preferredLanguage"
+								value={formData.preferredLanguage}
+								onChange={handleInputChange}
+								className={inputClass}
+							>
+								<option value="en">English</option>
+								<option value="es">Spanish</option>
+							</select>
+						</div>
 
-              </div>
-            </div>
+						<div>
+							<label className="text-sm">
+								🔑 Entry Instructions
+							</label>
+							<textarea
+								name="entryInstructions"
+								value={formData.entryInstructions}
+								onChange={handleInputChange}
+								className={inputClass}
+								rows={2}
+							/>
+						</div>
+					</div>
 
-            <div className="text-sm text-gray-600 bg-pink-100 drop-shadow-md p-3 rounded">
-              <div>
-                <div className="text-xl text-center font-semibold">
-                  Duration
-                </div>
+					<div className="flex items-center gap-2">
+						<span className="text-lg">📸</span>
+						<input
+							type="checkbox"
+							name="allowPhotos"
+							checked={formData.allowPhotos}
+							onChange={handleInputChange}
+						/>
+						<label className="text-sm">Allow Service Photos</label>
+					</div>
+				</div>
 
-                <div className="h-full flex mt-2 items-center justify-center ">
-                  <div className="text-center text-md">{Math.floor((fechas.end.getTime() - fechas.start.getTime()) / (1000 * 60))} minutes</div>
-                </div>
+				<textarea
+					name="notes"
+					placeholder="Additional Notes (any important information we should know)"
+					value={formData.notes}
+					onChange={handleInputChange}
+					className={`${inputClass} h-24`}
+				/>
 
-              </div>
-            </div>
+				<p className="text-xs text-gray-500">
+					All schedules and times are subject to change. Please wait
+					for confirmation of your appointment.
+				</p>
 
+				<div className="flex items-start gap-2">
+					<input
+						type="checkbox"
+						name="termsAccepted"
+						checked={formData.termsAccepted}
+						onChange={handleInputChange}
+						className="mt-1"
+						required
+					/>
+					<label className="text-sm text-gray-600">
+						I accept the terms and conditions and privacy policy
+					</label>
+				</div>
+			</div>
 
-
-          </div>
-
-          <div className="sm:hidden">
-            <>
-              <div><strong>Start:</strong> {fechas.start.toLocaleString()}</div>
-              <div><strong>End:</strong> {fechas.end.toLocaleString()}</div>
-              <div><strong>Duration:</strong> {Math.floor((fechas.end.getTime() - fechas.start.getTime()) / (1000 * 60))} minutes</div>
-
-            </>
-          </div>
-
-        </>
-
-      )}
-
-      <div className="space-y-3">
-        <input
-          type="text"
-          name="name"
-          placeholder="Full Name"
-          value={formData.name}
-          onChange={handleInputChange}
-          className={estiloDeInput}
-          required
-        />
-
-        <input
-          type="tel"
-          name="phone"
-          placeholder="Phone"
-          value={formData.phone || ''}
-          onChange={handleInputChange}
-          className={estiloDeInput}
-          required
-        />
-
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={handleInputChange}
-          className={estiloDeInput}
-          required
-        />
-
-        <input
-          type="text"
-          name="location"
-          placeholder="Full Address"
-          value={formData.location}
-          onChange={handleInputChange}
-          className={estiloDeInput}
-          required
-        />
-
-        <select
-          name="service"
-          value={formData.service}
-          onChange={handleInputChange}
-          className={estiloDeInput}
-          required
-        >
-          <option value="general cleaning">General Cleaning</option>
-          <option value="deep cleaning">Deep Cleaning</option>
-          <option value="office">Office</option>
-          <option value="consultation">Consultation</option>
-        </select>
-
-        <button
-          type="button"
-          onClick={() => setShowAdvanced(!showAdvanced)}
-          className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
-        >
-          {showAdvanced ? '▲ Hide Advanced Options' : '▼ Show Advanced Options'}
-        </button>
-
-        {showAdvanced && (
-          <div className="space-y-3 p-3 border rounded-lg bg-gray-50">
-
-            {/* Property type and pets */}
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-sm text-gray-600 mb-1">Property Type</label>
-                <select
-                  name="propertyType"
-                  value={formData.propertyType}
-                  onChange={handleInputChange}
-                  className={estiloDeInput}
-                >
-                  <option value="house">House</option>
-                  <option value="apartment">Apartment</option>
-                  <option value="office">Office</option>
-                </select>
-              </div>
-
-              <div className="flex justify-center flex-col">
-                <label className="block text-sm text-gray-600 mb-1">Has Pets?</label>
-                <div className="pl-3">
-                  <input
-                    type="checkbox"
-                    name="hasPets"
-                    checked={formData.hasPets}
-                    onChange={handleInputChange}
-                    className="rounded"
-                  />
-                  <label className="ml-2 text-sm text-gray-600">Yes</label>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <div>
-                <label className="block text-sm text-gray-600 mb-1">Bedrooms</label>
-                <input
-                  type="range"
-                  name="numBedrooms"
-                  min="1"
-                  max="5"
-                  value={formData.numBedrooms}
-                  onChange={handleInputChange}
-                  className="w-full"
-                />
-                <div className="text-sm text-gray-600 mt-1">Number of Bedrooms: {formData.numBedrooms}</div>
-              </div>
-
-              <div>
-                <label className="block text-sm text-gray-600 mb-1">Bathrooms</label>
-                <input
-                  type="range"
-                  name="numBathrooms"
-                  min="1"
-                  max="5"
-                  value={formData.numBathrooms}
-                  onChange={handleInputChange}
-                  className="w-full"
-                />
-                <div className="text-sm text-gray-600 mt-1">Number of Bathrooms: {formData.numBathrooms}</div>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm text-gray-600 mb-1">Preferred Language</label>
-              <select
-                name="preferredLanguage"
-                value={formData.preferredLanguage}
-                onChange={handleInputChange}
-                className={estiloDeInput}
-              >
-                <option value="en">English</option>
-                <option value="es">Spanish</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm text-gray-600 mb-1">Entry Instructions</label>
-              <textarea
-                name="entryInstructions"
-                value={formData.entryInstructions}
-                onChange={handleInputChange}
-                className={estiloDeInput}
-                rows={2}
-              />
-            </div>
-
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                name="allowPhotos"
-                checked={formData.allowPhotos}
-                onChange={handleInputChange}
-                className="rounded"
-              />
-              <label className="ml-2 text-sm text-gray-600">Allow Service Photos</label>
-            </div>
-          </div>
-        )}
-
-        <textarea
-          name="notes"
-          placeholder="Additional Notes (any important information we should know)"
-          value={formData.notes}
-          onChange={handleInputChange}
-          className={`${estiloDeInput} h-24`}
-        />
-
-        <div>
-          <p className="text-xs text-gray-500">
-            All schedules and times are subject to change. Please wait for confirmation of your appointment.
-          </p>
-        </div>
-        <div className="flex items-start gap-2">
-          <input
-            type="checkbox"
-            name="termsAccepted"
-            checked={formData.termsAccepted}
-            onChange={handleInputChange}
-            className="rounded mt-1"
-            required
-          />
-          <label className="text-sm text-gray-600">
-            I accept the terms and conditions and privacy policy
-          </label>
-        </div>
-      </div>
-
-      <button
-        type="submit"
-        disabled={!fechas || !formData.termsAccepted}
-        className="bg-pink-500 text-white py-2 px-4 rounded hover:bg-pink-600 transition disabled:opacity-50 disabled:cursor-not-allowed mt-2"
-      >
-        Confirm Booking
-      </button>
-    </form>
-  );
+			<button
+				type="submit"
+				disabled={!fechas || !formData.termsAccepted}
+				className="bg-[#F7CAC9] hover:bg-[#FBB9B8] text-[#4A2C2A] py-2 px-4 rounded mt-2 transition disabled:opacity-50 disabled:cursor-not-allowed"
+			>
+				Confirm Booking
+			</button>
+		</form>
+	);
 }
