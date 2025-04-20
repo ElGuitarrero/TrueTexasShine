@@ -28,7 +28,6 @@ const BookingDetails = () => {
 							start,
 							end,
 						}}
-						onSubmit={() => console.log("hola")}
 					/>
 				</div>
 			</div>

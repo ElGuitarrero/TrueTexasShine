@@ -3,6 +3,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { supabase } from "@/lib/supabase";
 import Swal from "sweetalert2";
 
 interface BasicBookingInfo {
@@ -27,19 +28,15 @@ interface AdvancedBookingInfo {
 
 type BookingFormProps = {
 	fechas: { start: Date; end: Date } | null;
-	onSubmit: (booking: {
-		name: string;
-		phone: string;
-		notes: string;
-		start: Date;
-		end: Date;
-	}) => void;
 };
 
-export default function BookingForm({ fechas, onSubmit }: BookingFormProps) {
+export default function BookingForm({ fechas }: BookingFormProps) {
 	// const [showAdvanced, setShowAdvanced] = useState(false);
 	const [formData, setFormData] = useState<
-		BasicBookingInfo & Partial<AdvancedBookingInfo>
+		BasicBookingInfo &
+			Partial<
+				AdvancedBookingInfo & { colonia?: string; zipcode?: string }
+			>
 	>({
 		name: "",
 		phone: 0,
@@ -55,6 +52,8 @@ export default function BookingForm({ fechas, onSubmit }: BookingFormProps) {
 		preferredLanguage: "en",
 		entryInstructions: "",
 		allowPhotos: false,
+		colonia: "",
+		zipcode: "",
 	});
 
 	const router = useRouter();
@@ -74,24 +73,54 @@ export default function BookingForm({ fechas, onSubmit }: BookingFormProps) {
 		}));
 	};
 
-	const handleSubmit = (e: React.FormEvent) => {
+	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		if (!fechas || !formData.termsAccepted) return;
 
-		onSubmit({
-			name: formData.name,
-			phone: formData.phone.toString(),
-			notes: formData.notes,
-			start: fechas.start,
-			end: fechas.end,
-		});
+		const { data, error } = await supabase.from("bookings").insert([
+			{
+				name: formData.name,
+				phone: formData.phone.toString(),
+				email: formData.email,
+				location: formData.location,
+				service: formData.service,
+				start: fechas.start,
+				end_time: fechas.end,
+				notes: formData.notes,
+				has_pets: formData.hasPets,
+				property_type: formData.propertyType,
+				num_bedrooms: formData.numBedrooms,
+				num_bathrooms: formData.numBathrooms,
+				preferred_language: formData.preferredLanguage,
+				entry_instructions: formData.entryInstructions,
+				allow_photos: formData.allowPhotos,
+				status: "pending",
+				colonia: formData.colonia,
+				zipcode: formData.zipcode,
+			},
+		]);
+
+		if (error) {
+			console.error("❌ Error saving booking:", error.message);
+			Swal.fire({
+				icon: "error",
+				title: "Error",
+				text: "There was a problem saving your booking. Please try again.",
+				confirmButtonColor: "#F7CAC9",
+			});
+			return;
+		}
 
 		Swal.fire({
 			icon: "success",
 			title: "Appointment Requested",
 			text: "We'll confirm your booking shortly!",
 			confirmButtonColor: "#F7CAC9",
+		}).then(() => {
+			router.push("/"); // o a una página de confirmación
 		});
+
+		console.log(data);
 	};
 
 	const inputClass = "w-full border border-[#DCC5C5] p-2 rounded";
@@ -202,6 +231,33 @@ export default function BookingForm({ fechas, onSubmit }: BookingFormProps) {
 						onChange={handleInputChange}
 						className={inputClass}
 						required
+					/>
+				</div>
+				{/* 🏘 Colonia */}
+				<div>
+					<label className="text-sm flex items-center gap-2">
+						🏘 City
+					</label>
+					<input
+						type="text"
+						name="colonia"
+						value={formData.colonia}
+						onChange={handleInputChange}
+						className={inputClass}
+					/>
+				</div>
+
+				{/* 🧾 Zip Code */}
+				<div>
+					<label className="text-sm flex items-center gap-2">
+						🧾 Zip Code
+					</label>
+					<input
+						type="text"
+						name="zipcode"
+						value={formData.zipcode}
+						onChange={handleInputChange}
+						className={inputClass}
 					/>
 				</div>
 

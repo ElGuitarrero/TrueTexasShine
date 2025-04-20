@@ -9,18 +9,20 @@ import {
 	subWeeks,
 	startOfWeek,
 	addMinutes,
+	parseISO
 } from "date-fns";
 import { useState, useEffect } from "react";
 import Swal from "sweetalert2";
 import { useBookingStore } from "@/stores/useBookingStore";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 
 interface Booking {
 	start: Date;
 	end: Date;
 }
 
-const slots = Array.from({ length: 25 }, (_, i) => 6 + i * 0.5); // 6:00 AM to 6:00 PM
+const slots = Array.from({ length: 25 }, (_, i) => 6 + i * 0.5);
 
 const formatHour = (hour: number) => {
 	const fullHours = Math.floor(hour);
@@ -31,46 +33,33 @@ const formatHour = (hour: number) => {
 };
 
 const getWeekDates = (startDate: Date) => {
-	const start = startOfWeek(startDate, { weekStartsOn: 0 }); // Sunday
-	return Array.from(
-		{ length: 7 },
-		(_, i) =>
-			new Date(start.getFullYear(), start.getMonth(), start.getDate() + i)
-	);
+	const start = startOfWeek(startDate, { weekStartsOn: 1 });
+	return Array.from({ length: 6 }, (_, i) => new Date(start.getFullYear(), start.getMonth(), start.getDate() + i));
 };
 
 const WeeklyCalendar = () => {
 	const [bookings, setBookings] = useState<Booking[]>([]);
-	const [hoveredCell, setHoveredCell] = useState<{
-		date: Date;
-		hour: number;
-	} | null>(null);
+	const [hoveredCell, setHoveredCell] = useState<{ date: Date; hour: number } | null>(null);
 	const [selectedRange, setSelectedRange] = useState<Booking | null>(null);
 	const [currentWeekStart, setCurrentWeekStart] = useState<Date>(new Date());
-	// const [showForm, setShowForm] = useState<boolean>(false);
 	const router = useRouter();
 	const setBooking = useBookingStore((state) => state.setBooking);
-
 	const weekDates = getWeekDates(currentWeekStart);
 
 	useEffect(() => {
-		// We will fetch the bookings
-
-		const hardcodedBookings: Booking[] = [
-			{
-				start: new Date(2025, 3, 16, 9, 0), // May 16, 2025, 9:00 AM
-				end: new Date(2025, 3, 16, 11, 0), // May 16, 2025, 11:00 AM
-			},
-			{
-				start: new Date(2025, 3, 17, 14, 0), // May 17, 2025, 2:00 PM
-				end: new Date(2025, 3, 17, 16, 0), // May 17, 2025, 4:00 PM
-			},
-			{
-				start: new Date(2025, 3, 18, 10, 30), // May 18, 2025, 10:30 AM
-				end: new Date(2025, 3, 18, 12, 30), // May 18, 2025, 12:30 PM
-			},
-		];
-		setBookings(hardcodedBookings);
+		const fetchBookings = async () => {
+			const { data, error } = await supabase.from("bookings").select("start, end_time");
+			if (data) {
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				const parsed = data.map((b: any) => ({
+					start: parseISO(b.start),
+					end: parseISO(b.end_time),
+				}));
+				setBookings(parsed);
+			}
+			if (error) console.error("Error fetching bookings", error);
+		};
+		fetchBookings();
 	}, []);
 
 	const handleCellClick = (dayIndex: number, hour: number) => {
