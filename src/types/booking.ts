@@ -11,16 +11,19 @@ export interface Booking {
 
   service: ServiceType;
   start: Date;
-  end: Date;
+  end_time: Date;
+
+  zipcode?: string,
+  colonia?: string
 
   notes?: string;
-  hasPets?: boolean;
-  propertyType?: PropertyType;
-  numBedrooms?: number;
-  numBathrooms?: number;
-  preferredLanguage?: "en" | "es";
-  entryInstructions?: string;
-  allowPhotos?: boolean;
+  has_pets?: boolean;
+  property_type?: PropertyType;
+  num_bedrooms?: number;
+  num_bathrooms?: number;
+  preferred_language?: "en" | "es";
+  entry_instructions?: string;
+  allow_photos?: boolean;
 
   status: BookingStatus;
   createdAt: Date;
