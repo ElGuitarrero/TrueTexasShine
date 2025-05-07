@@ -4,6 +4,7 @@ import { useRouter, useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { format } from "date-fns";
 import { Booking } from "@/types/booking";
+import Swal from "sweetalert2";
 
 export default function BookingDetailsPage() {
 	const router = useRouter();
@@ -45,9 +46,9 @@ export default function BookingDetailsPage() {
 		booking.location
 	)}&output=embed`;
 
-    // console.log(booking)
-    // console.log(booking.start)
-    // console.log(booking.end_time)
+	// console.log(booking)
+	// console.log(booking.start)
+	// console.log(booking.end_time)
 
 	return (
 		<div className="max-w-5xl mx-auto p-6 space-y-6 text-[#4A2C2A]">
@@ -118,14 +119,18 @@ export default function BookingDetailsPage() {
 						</p>
 						{booking.colonia ? (
 							<p>
-                            <strong>Colonia:</strong> {booking.colonia}
-                        </p>
-						) : ''}
+								<strong>Colonia:</strong> {booking.colonia}
+							</p>
+						) : (
+							""
+						)}
 						{booking.zipcode ? (
 							<p>
 								<strong>Zipcode:</strong> {booking.zipcode}
 							</p>
-						) : ("")}
+						) : (
+							""
+						)}
 
 						<div className="rounded-lg overflow-hidden mt-3 shadow-md">
 							<iframe
@@ -145,7 +150,9 @@ export default function BookingDetailsPage() {
 							{format(new Date(booking.start), "PPPP")}
 						</p>
 						<p>
-							<strong>Time: </strong> {booking.start ? format(booking.start, "p") : ""} - {format(booking.end_time, "p")}
+							<strong>Time: </strong>{" "}
+							{booking.start ? format(booking.start, "p") : ""} -{" "}
+							{format(booking.end_time, "p")}
 						</p>
 						<p>
 							<strong>Status:</strong>{" "}
@@ -165,6 +172,49 @@ export default function BookingDetailsPage() {
 
 			{/* Actions */}
 			<div className="flex flex-col sm:flex-row gap-4 justify-between mt-6">
+				{booking.status === "completed" && (
+					<button
+                    onClick={async () => {
+                      const result = await Swal.fire({
+                        title: "¿Volver a agendar este cliente?",
+                        text: "Se precargarán sus datos en el formulario de reserva.",
+                        icon: "question",
+                        showCancelButton: true,
+                        confirmButtonColor: "#F7CAC9",
+                        cancelButtonColor: "#ddd",
+                        confirmButtonText: "Sí, volver a agendar",
+                        cancelButtonText: "Cancelar",
+                      });
+                      
+                      
+
+                      if (result.isConfirmed) {
+                        localStorage.setItem("repeatClient", JSON.stringify({
+                            name: booking.name,
+                            phone: booking.phone,
+                            email: booking.email,
+                            location: booking.location,
+                            service: booking.service,
+                            preferred_language: booking.preferred_language,
+                            has_pets: booking.has_pets,
+                            property_type: booking.property_type,
+                            num_bedrooms: booking.num_bedrooms,
+                            num_bathrooms: booking.num_bathrooms,
+                            entry_instructions: booking.entry_instructions,
+                            allow_photos: booking.allow_photos,
+                            notes: booking.notes,
+                            colonia: booking.colonia,
+                            zipcode: booking.zipcode,
+                          }));
+                        router.push("/calendar");
+                      }
+                    }}
+                    className="bg-[#FFE5EC] hover:bg-[#FBB9B8] text-[#4A2C2A] py-2 px-4 rounded transition shadow"
+                  >
+                    🔁 Volver a agendar
+                  </button>
+				)}
+
 				{booking.status !== "completed" && (
 					<button
 						onClick={markAsCompleted}

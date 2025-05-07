@@ -44,7 +44,8 @@ const WeeklyCalendar = () => {
 	const [currentWeekStart, setCurrentWeekStart] = useState<Date>(new Date());
 	const router = useRouter();
 	const setBooking = useBookingStore((state) => state.setBooking);
-	const weekDates = getWeekDates(currentWeekStart);
+	const weekDates = getWeekDates(currentWeekStart);	
+	const [clienteRepetir, setClienteRepetir] = useState<Booking | null>(null)
 
 	useEffect(() => {
 		const fetchBookings = async () => {
@@ -59,7 +60,16 @@ const WeeklyCalendar = () => {
 			}
 			if (error) console.error("Error fetching bookings", error);
 		};
+	
 		fetchBookings();
+	
+		// 💡 Detecta si viene desde "volver a agendar"
+		const repeatClient = localStorage.getItem("repeatClient");
+		if (repeatClient) {
+			setClienteRepetir(JSON.parse(repeatClient));
+			console.log("Rebooking for client:", JSON.parse(repeatClient));
+			// aquí podrías incluso mostrar un mensaje o preseleccionar algo visual si quieres
+		}
 	}, []);
 
 	const handleCellClick = (dayIndex: number, hour: number) => {
@@ -271,7 +281,7 @@ const WeeklyCalendar = () => {
 								</button>
 							</div>
 						</>
-					) : (<p>Please select the hours that you want us to work </p>)}
+					) : (<p>{clienteRepetir ? "Please select the hours that you want us to work " : `Estas reagendando`}</p>)}
 				</div>
 			</div>
 		</div>
