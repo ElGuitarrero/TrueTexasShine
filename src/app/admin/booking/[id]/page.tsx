@@ -50,6 +50,11 @@ export default function BookingDetailsPage() {
 	// console.log(booking.start)
 	// console.log(booking.end_time)
 
+	const idiomas = {	
+		"en": "Ingles",
+		"es": "Espanol"
+	}
+
 	return (
 		<div className="max-w-5xl mx-auto p-6 space-y-6 text-[#4A2C2A]">
 			<h1 className="text-3xl font-bold text-center mb-4">
@@ -71,8 +76,8 @@ export default function BookingDetailsPage() {
 							<strong>Email:</strong> {booking.email}
 						</p>
 						<p>
-							<strong>Preferred Language:</strong>{" "}
-							{booking.preferred_language}
+							<strong>Idioma preferido:</strong>{" "}
+							{booking.preferred_language && idiomas[booking.preferred_language]}
 						</p>
 					</BentoBox>
 

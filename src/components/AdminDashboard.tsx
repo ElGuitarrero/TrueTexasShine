@@ -25,7 +25,8 @@ export default function AdminDashboard() {
 	const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
 	const fetchBookings = async () => {
-		const { data } = await supabase
+		try {
+			const { data } = await supabase
 			.from("bookings")
 			.select(
 				"id, name, phone, service, location, start, end_time, status"
@@ -33,7 +34,11 @@ export default function AdminDashboard() {
 			.order("start", { ascending: true });
 
 		if (data) setBookings(data);
+		
 		setLoading(false);
+		} catch (error) {
+			alert(`Hubo un error al cargar los datos ${error}`)
+		}
 	};
 
 	const markAsCompleted = async (id: string) => {
@@ -45,6 +50,12 @@ export default function AdminDashboard() {
 	};
 
 	useEffect(() => {
+
+		const savedAuth = localStorage.getItem("admin-auth");
+		if (savedAuth === "true") {
+			setAuthenticated(true);
+		}
+
 		if (authenticated) fetchBookings();
 	}, [authenticated]);
 
@@ -68,6 +79,7 @@ export default function AdminDashboard() {
 				<button
 					onClick={() => {
 						if (pin === "2024") {
+							localStorage.setItem("admin-auth", "true"); // 👈 guarda en localStorage
 							setAuthenticated(true);
 						} else {
 							alert("Incorrect PIN");
@@ -82,6 +94,8 @@ export default function AdminDashboard() {
 	}
 
 	if (loading) return <p className="text-center p-4">Loading bookings...</p>;
+
+	const dayWithBookings = bookings.map((b) => format(new Date(b.start), "yyyy-MM-dd"))
 
 	const MostrarInformacion = ({
 		filteredBookings,
@@ -166,7 +180,7 @@ export default function AdminDashboard() {
 				Admin Dashboard
 			</h2>
 
-			<div className="grid md:grid-cols-2 gap-6">
+			<div className="gap-6 w-full">
 				<div>
 					<h3 className="text-lg font-semibold mb-2 text-[#4A2C2A]">
 						Select a day
@@ -174,7 +188,13 @@ export default function AdminDashboard() {
 					<Calendar
 						onChange={(date) => setSelectedDate(date as Date)}
 						value={selectedDate}
-						className="rounded border border-[#F7CAC9] p-2"
+						className="w-full rounded border border-[#F7CAC9] p-2"
+						tileContent={({ date, view }) =>
+							view === "month" && dayWithBookings.includes(format(date, "yyyy-MM-dd")) ? (
+							  <div className="flex justify-center mt-1">
+								<span className="w-2 h-2 rounded-full bg-[#F7CAC9]"></span>
+							  </div>
+							) : null }
 					/>
 					{selectedDate && (
 						<p className="mt-2 text-sm text-gray-700">

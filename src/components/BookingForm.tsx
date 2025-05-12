@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import Swal from "sweetalert2";
+import GooglePlacesInput from "@/components/GooglePlacesInput";
 
 interface BasicBookingInfo {
 	name: string;
@@ -58,6 +59,8 @@ export default function BookingForm({ fechas }: BookingFormProps) {
 
 	const router = useRouter();
 
+	
+
 	const handleInputChange = (
 		e: React.ChangeEvent<
 			HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -72,6 +75,7 @@ export default function BookingForm({ fechas }: BookingFormProps) {
 					: value,
 		}));
 	};
+
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -219,22 +223,24 @@ export default function BookingForm({ fechas }: BookingFormProps) {
 					/>
 				</div>
 
-				{/* 📍 Address */}
+				{/* 📍 Address with Autocomplete */}
 				<div>
 					<label className="text-sm flex items-center gap-2">
 						📍 Full Address
 					</label>
-					<input
-						type="text"
-						name="location"
+					<GooglePlacesInput
+						apiKey={process.env.NEXT_PUBLIC_CLAVE_GOOGLE_API!}
 						value={formData.location}
-						onChange={handleInputChange}
-						className={inputClass}
-						required
+						onChange={(val) =>
+							setFormData((prev) => ({ ...prev, location: val }))
+						}
+						onSelect={(val) =>
+							setFormData((prev) => ({ ...prev, location: val }))
+						}
 					/>
 				</div>
 				{/* 🏘 Colonia */}
-				<div>
+				{/* <div>
 					<label className="text-sm flex items-center gap-2">
 						🏘 City
 					</label>
@@ -245,7 +251,7 @@ export default function BookingForm({ fechas }: BookingFormProps) {
 						onChange={handleInputChange}
 						className={inputClass}
 					/>
-				</div>
+				</div> */}
 
 				{/* 🧾 Zip Code */}
 				<div>
