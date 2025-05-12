@@ -10,6 +10,7 @@ export default function BookingDetailsPage() {
 	const router = useRouter();
 	const params = useParams();
 	const bookingId = params?.id;
+	const [lang, setLang] = useState<"en" | "es">("es");
 
 	const [booking, setBooking] = useState<Booking>();
 	const [loading, setLoading] = useState(true);
@@ -39,99 +40,177 @@ export default function BookingDetailsPage() {
 		fetchBooking();
 	}, [bookingId]);
 
-	if (loading) return <p className="p-6">Loading booking...</p>;
-	if (!booking) return <p className="p-6">Booking not found.</p>;
+	if (loading) return <p className="p-6">{lang === "es" ? "Cargando..." : "Loading booking..."}</p>;
+	if (!booking) return <p className="p-6">{lang === "es" ? "Reserva no encontrada." : "Booking not found."}</p>;
 
 	const mapUrl = `https://www.google.com/maps?q=${encodeURIComponent(
 		booking.location
 	)}&output=embed`;
 
-	// console.log(booking)
-	// console.log(booking.start)
-	// console.log(booking.end_time)
-
-	const idiomas = {	
-		"en": "Ingles",
-		"es": "Espanol"
+	const idiomas = {
+		"en": "Ingles - English",
+		"es": "Espanol - Spanish"
 	}
+
+	const text = {
+		en: {
+			title: "📋 Booking Summary",
+			customer: "👤 Customer",
+			service: "📦 Service Info",
+			notes: "📝 Notes",
+			location: "📍 Location",
+			schedule: "⏰ Schedule",
+			name: "Name",
+			phone: "Phone",
+			email: "Email",
+			language: "Preferred Language",
+			serviceType: "Service",
+			property: "Property Type",
+			pets: "Has Pets",
+			bedrooms: "Bedrooms",
+			bathrooms: "Bathrooms",
+			instructions: "Instructions",
+			photos: "Allow Photos",
+			additional: "Additional Notes",
+			address: "Address",
+			colonia: "Colonia",
+			zipcode: "Zipcode",
+			date: "Date",
+			time: "Time",
+			status: "Status",
+			completed: "✅ Mark as Completed",
+			repeat: "🔁 Book Again",
+			back: "← Go Back",
+			confirmTitle: "Book this client again?",
+			confirmText: "Their info will be pre-filled.",
+			yes: "Yes, book again",
+			cancel: "Cancel",
+			loading: "Loading booking...",
+			notFound: "Booking not found.",
+		},
+		es: {
+			title: "📋 Detalles de la Reserva",
+			customer: "👤 Cliente",
+			service: "📦 Servicio",
+			notes: "📝 Notas",
+			location: "📍 Ubicación",
+			schedule: "⏰ Horario",
+			name: "Nombre",
+			phone: "Teléfono",
+			email: "Correo",
+			language: "Idioma preferido",
+			serviceType: "Servicio",
+			property: "Tipo de propiedad",
+			pets: "¿Mascotas?",
+			bedrooms: "Cuartos",
+			bathrooms: "Baños",
+			instructions: "Instrucciones",
+			photos: "Permitir fotos",
+			additional: "Notas adicionales",
+			address: "Dirección",
+			colonia: "Colonia",
+			zipcode: "Código postal",
+			date: "Fecha",
+			time: "Horario",
+			status: "Estado",
+			completed: "✅ Marcar como completado",
+			repeat: "🔁 Volver a agendar",
+			back: "← Regresar",
+			confirmTitle: "¿Volver a agendar este cliente?",
+			confirmText: "Se precargarán sus datos.",
+			yes: "Sí, volver a agendar",
+			cancel: "Cancelar",
+			loading: "Cargando reserva...",
+			notFound: "Reserva no encontrada.",
+		},
+	}[lang];
+
 
 	return (
 		<div className="max-w-5xl mx-auto p-6 space-y-6 text-[#4A2C2A]">
-			<h1 className="text-3xl font-bold text-center mb-4">
-				📋 Booking Summary
-			</h1>
+
+			<div className="flex justify-end">
+				<button
+					onClick={() => setLang(lang === "en" ? "es" : "en")}
+					className="text-sm px-3 py-1 border border-[#F7CAC9] rounded bg-[#fff6f8] hover:bg-[#FBB9B8]"
+				>
+					🌐 {lang === "en" ? "Español" : "English"}
+				</button>
+			</div>
+
+			<h1 className="text-3xl font-bold text-center mb-4">{text.title}</h1>
 
 			{/* Grid layout */}
 			<div className="grid sm:grid-cols-2 gap-5">
 				{/* Column 1 */}
 				<div className="space-y-4 flex flex-col justify-between">
-					<BentoBox label="👤 Customer">
+					<BentoBox label={text.customer}>
 						<p>
-							<strong>Name:</strong> {booking.name}
+							<strong>{text.name}:</strong> {booking.name}
 						</p>
 						<p>
-							<strong>Phone:</strong> {booking.phone}
+							<strong>{text.phone}:</strong> {booking.phone}
 						</p>
 						<p>
-							<strong>Email:</strong> {booking.email}
+							<strong>{text.email}:</strong> {booking.email}
 						</p>
 						<p>
-							<strong>Idioma preferido:</strong>{" "}
+							<strong>{text.language}:</strong>{" "}
 							{booking.preferred_language && idiomas[booking.preferred_language]}
 						</p>
 					</BentoBox>
 
-					<BentoBox label="📦 Service Info">
+					<BentoBox label={text.service}>
 						<p>
-							<strong>Service:</strong> {booking.service}
+							<strong>{text.serviceType}:</strong> {booking.service}
 						</p>
 						<p>
-							<strong>Property Type:</strong>{" "}
+							<strong>{text.property}:</strong>{" "}
 							{booking.property_type}
 						</p>
 						<p>
-							<strong>Has Pets:</strong>{" "}
+							<strong>{text.pets}:</strong>{" "}
 							{booking.has_pets ? "Yes" : "No"}
 						</p>
 						<p>
-							<strong>Bedrooms:</strong> {booking.num_bedrooms}
+							<strong>{text.bedrooms}:</strong> {booking.num_bedrooms}
 						</p>
 						<p>
-							<strong>Bathrooms:</strong> {booking.num_bathrooms}
+							<strong>{text.bathrooms}:</strong> {booking.num_bathrooms}
 						</p>
 					</BentoBox>
 
-					<BentoBox label="📝 Notes">
+					<BentoBox label={text.notes}>
 						<p>
-							<strong>Instructions:</strong>{" "}
+							<strong>{text.instructions}:</strong>{" "}
 							{booking.entry_instructions}
 						</p>
 						<p>
-							<strong>Allow Photos:</strong>{" "}
+							<strong>{text.photos}:</strong>{" "}
 							{booking.allow_photos ? "Yes" : "No"}
 						</p>
 						<p>
-							<strong>Additional Notes:</strong> {booking.notes}
+							<strong>{text.additional}:</strong> {booking.notes}
 						</p>
 					</BentoBox>
 				</div>
 
 				{/* Column 2 */}
-				<div className="space-y-4 flex flex-col justify-between gap-5">
-					<BentoBox label="📍 Location">
+				<div className="space-y-4 flex flex-col justify-between">
+					<BentoBox label={text.location}>
 						<p>
-							<strong>Address:</strong> {booking.location}
+							<strong>{text.address}:</strong> {booking.location}
 						</p>
 						{booking.colonia ? (
 							<p>
-								<strong>Colonia:</strong> {booking.colonia}
+								<strong>{text.colonia}:</strong> {booking.colonia}
 							</p>
 						) : (
 							""
 						)}
 						{booking.zipcode ? (
 							<p>
-								<strong>Zipcode:</strong> {booking.zipcode}
+								<strong>{text.zipcode}:</strong> {booking.zipcode}
 							</p>
 						) : (
 							""
@@ -141,7 +220,7 @@ export default function BookingDetailsPage() {
 							<iframe
 								src={mapUrl}
 								width="100%"
-								height="200"
+								height="240"
 								style={{ border: 0 }}
 								loading="lazy"
 								allowFullScreen
@@ -149,18 +228,18 @@ export default function BookingDetailsPage() {
 						</div>
 					</BentoBox>
 
-					<BentoBox label="⏰ Schedule">
+					<BentoBox label={text.schedule}>
 						<p>
-							<strong>Date:</strong>{" "}
+							<strong>{text.date}:</strong>{" "}
 							{format(new Date(booking.start), "PPPP")}
 						</p>
 						<p>
-							<strong>Time: </strong>{" "}
+							<strong>{text.time}: </strong>{" "}
 							{booking.start ? format(booking.start, "p") : ""} -{" "}
 							{format(booking.end_time, "p")}
 						</p>
 						<p>
-							<strong>Status:</strong>{" "}
+							<strong>{text.status}:</strong>{" "}
 							<span
 								className={
 									booking.status === "completed"
@@ -179,45 +258,45 @@ export default function BookingDetailsPage() {
 			<div className="flex flex-col sm:flex-row gap-4 justify-between mt-6">
 				{booking.status === "completed" && (
 					<button
-                    onClick={async () => {
-                      const result = await Swal.fire({
-                        title: "¿Volver a agendar este cliente?",
-                        text: "Se precargarán sus datos en el formulario de reserva.",
-                        icon: "question",
-                        showCancelButton: true,
-                        confirmButtonColor: "#F7CAC9",
-                        cancelButtonColor: "#ddd",
-                        confirmButtonText: "Sí, volver a agendar",
-                        cancelButtonText: "Cancelar",
-                      });
-                      
-                      
+						onClick={async () => {
+							const result = await Swal.fire({
+								title: "¿Volver a agendar este cliente?",
+								text: "Se precargarán sus datos en el formulario de reserva.",
+								icon: "question",
+								showCancelButton: true,
+								confirmButtonColor: "#F7CAC9",
+								cancelButtonColor: "#ddd",
+								confirmButtonText: "Sí, volver a agendar",
+								cancelButtonText: "Cancelar",
+							});
 
-                      if (result.isConfirmed) {
-                        localStorage.setItem("repeatClient", JSON.stringify({
-                            name: booking.name,
-                            phone: booking.phone,
-                            email: booking.email,
-                            location: booking.location,
-                            service: booking.service,
-                            preferred_language: booking.preferred_language,
-                            has_pets: booking.has_pets,
-                            property_type: booking.property_type,
-                            num_bedrooms: booking.num_bedrooms,
-                            num_bathrooms: booking.num_bathrooms,
-                            entry_instructions: booking.entry_instructions,
-                            allow_photos: booking.allow_photos,
-                            notes: booking.notes,
-                            colonia: booking.colonia,
-                            zipcode: booking.zipcode,
-                          }));
-                        router.push("/calendar");
-                      }
-                    }}
-                    className="bg-[#FFE5EC] hover:bg-[#FBB9B8] text-[#4A2C2A] py-2 px-4 rounded transition shadow"
-                  >
-                    🔁 Volver a agendar
-                  </button>
+
+
+							if (result.isConfirmed) {
+								localStorage.setItem("repeatClient", JSON.stringify({
+									name: booking.name,
+									phone: booking.phone,
+									email: booking.email,
+									location: booking.location,
+									service: booking.service,
+									preferred_language: booking.preferred_language,
+									has_pets: booking.has_pets,
+									property_type: booking.property_type,
+									num_bedrooms: booking.num_bedrooms,
+									num_bathrooms: booking.num_bathrooms,
+									entry_instructions: booking.entry_instructions,
+									allow_photos: booking.allow_photos,
+									notes: booking.notes,
+									colonia: booking.colonia,
+									zipcode: booking.zipcode,
+								}));
+								router.push("/calendar");
+							}
+						}}
+						className="bg-[#FFE5EC] hover:bg-[#FBB9B8] text-[#4A2C2A] py-2 px-4 rounded transition shadow"
+					>
+						🔁 Volver a agendar
+					</button>
 				)}
 
 				{booking.status !== "completed" && (

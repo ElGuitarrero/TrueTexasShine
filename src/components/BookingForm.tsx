@@ -35,9 +35,9 @@ export default function BookingForm({ fechas }: BookingFormProps) {
 	// const [showAdvanced, setShowAdvanced] = useState(false);
 	const [formData, setFormData] = useState<
 		BasicBookingInfo &
-			Partial<
-				AdvancedBookingInfo & { colonia?: string; zipcode?: string }
-			>
+		Partial<
+			AdvancedBookingInfo & { colonia?: string; zipcode?: string }
+		>
 	>({
 		name: "",
 		phone: 0,
@@ -48,8 +48,8 @@ export default function BookingForm({ fechas }: BookingFormProps) {
 		termsAccepted: false,
 		hasPets: false,
 		propertyType: "house",
-		numBedrooms: 1,
-		numBathrooms: 1,
+		numBedrooms: 4,
+		numBathrooms: 3,
 		preferredLanguage: "en",
 		entryInstructions: "",
 		allowPhotos: false,
@@ -59,7 +59,28 @@ export default function BookingForm({ fechas }: BookingFormProps) {
 
 	const router = useRouter();
 
-	
+	function calcularPrecio(
+		tipo: "deep cleaning" | "consultation" | "office" | "general cleaning",
+		cuartos: number,
+		banos: number,
+		hasPets: boolean
+	): number {
+		const base = tipo === "deep cleaning" ? 120 : 90;
+		const extraPorCuarto = tipo === "deep cleaning" ? 20 : 15;
+		const extraPorBano = tipo === "deep cleaning" ? 25 : 20;
+		const extraPorMascota = hasPets ? 30 : 0
+
+		return (
+			base + (cuartos - 1) * extraPorCuarto + (banos - 1) * extraPorBano + extraPorMascota
+		);
+	}
+
+	const estimatedPrice = calcularPrecio(
+		formData.service,
+		formData.numBedrooms ?? 1,
+		formData.numBathrooms ?? 1,
+		formData.hasPets ?? false
+	);
 
 	const handleInputChange = (
 		e: React.ChangeEvent<
@@ -76,12 +97,15 @@ export default function BookingForm({ fechas }: BookingFormProps) {
 		}));
 	};
 
-
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		if (!fechas || !formData.termsAccepted) return;
 
-		const { data, error } = await supabase.from("bookings").insert([
+		// const breakStart = fechas.start
+		const breakEnd = new Date(fechas.end);
+		breakEnd.setHours(fechas.end.getHours() + 1);
+
+		const { error } = await supabase.from("bookings").insert([
 			{
 				name: formData.name,
 				phone: formData.phone.toString(),
@@ -89,7 +113,7 @@ export default function BookingForm({ fechas }: BookingFormProps) {
 				location: formData.location,
 				service: formData.service,
 				start: fechas.start,
-				end_time: fechas.end,
+				end_time: breakEnd,
 				notes: formData.notes,
 				has_pets: formData.hasPets,
 				property_type: formData.propertyType,
@@ -124,7 +148,7 @@ export default function BookingForm({ fechas }: BookingFormProps) {
 			router.push("/"); // o a una página de confirmación
 		});
 
-		console.log(data);
+		// console.log(data);
 	};
 
 	const inputClass = "w-full border border-[#DCC5C5] p-2 rounded";
@@ -138,7 +162,7 @@ export default function BookingForm({ fechas }: BookingFormProps) {
 				<button
 					type="button"
 					onClick={() => router.back()}
-					className="bg-[#F7CAC9] hover:bg-[#FBB9B8] px-4 py-2 rounded text-sm sm:text-base"
+					className="cursor-pointer bg-[#F7CAC9] hover:bg-[#FBB9B8] px-4 py-2 rounded text-sm sm:text-base"
 				>
 					← Back
 				</button>
@@ -169,7 +193,7 @@ export default function BookingForm({ fechas }: BookingFormProps) {
 							{Math.floor(
 								(fechas.end.getTime() -
 									fechas.start.getTime()) /
-									(1000 * 60)
+								(1000 * 60)
 							)}{" "}
 							minutes
 						</p>
@@ -288,111 +312,103 @@ export default function BookingForm({ fechas }: BookingFormProps) {
 					</select>
 				</div>
 
-				<div className="space-y-5 p-5 border border-[#F7CAC9] bg-[#FFF0F2] rounded-lg">
-					<div className="grid sm:grid-cols-2 gap-4">
-						<div>
-							<label className="text-sm">🏠 Property Type</label>
-							<select
-								name="propertyType"
-								value={formData.propertyType}
-								onChange={handleInputChange}
-								className={inputClass}
-							>
-								<option value="house">House</option>
-								<option value="apartment">Apartment</option>
-								<option value="office">Office</option>
-							</select>
-						</div>
-
-						<div className="flex items-center gap-2 mt-6 sm:mt-[30px]">
-							<span className="text-lg">🐶</span>
-							<input
-								type="checkbox"
-								name="hasPets"
-								checked={formData.hasPets}
-								onChange={handleInputChange}
-							/>
-							<label className="text-sm">Has Pets?</label>
-						</div>
+				<div className="flex flex-col gap-4 p-5 border border-[#F7CAC9] bg-[#FFF0F2] rounded-lg">
+					<div>
+						<p className="text-lg font-semibold">Property Information</p>
 					</div>
 
-					<div className="grid sm:grid-cols-2 gap-4">
-						<div>
-							<label className="text-sm block mb-1">
-								🛏 Bedrooms
-							</label>
-							<select
-								name="numBedrooms"
-								value={formData.numBedrooms}
-								onChange={handleInputChange}
-								className="w-full border border-[#DCC5C5] p-2 rounded"
-							>
-								{[1, 2, 3, 4, 5].map((num) => (
-									<option key={num} value={num}>
-										{num} Bedroom{num > 1 ? "s" : ""}
-									</option>
-								))}
-							</select>
-						</div>
+					<label className="text-sm text-[#4A2C2A]">
+						🏠 Property Type
+					</label>
+					<select
+						name="propertyType"
+						value={formData.propertyType}
+						onChange={handleInputChange}
+						className={inputClass}
+					>
+						<option value="house">House</option>
+						<option value="apartment">Apartment</option>
+						<option value="office">Office</option>
+					</select>
 
-						<div>
-							<label className="text-sm block mb-1">
-								🛁 Bathrooms
-							</label>
-							<select
-								name="numBathrooms"
-								value={formData.numBathrooms}
-								onChange={handleInputChange}
-								className="w-full border border-[#DCC5C5] p-2 rounded"
-							>
-								{[1, 2, 3, 4, 5].map((num) => (
-									<option key={num} value={num}>
-										{num} Bathroom{num > 1 ? "s" : ""}
-									</option>
-								))}
-							</select>
-						</div>
+					<div className="flex gap-3 items-center">
+						<input
+							type="checkbox"
+							name="hasPets"
+							checked={formData.hasPets}
+							onChange={handleInputChange}
+							className="accent-green-600 size-4 cursor-pointer"
+						/>
+						<label className="text-sm text-[#4A2C2A]">
+							🐶 Has Pets?
+						</label>
 					</div>
 
-					<div className="grid sm:grid-cols-2 gap-4">
-						<div>
-							<label className="text-sm">
-								🌐 Preferred Language
-							</label>
-							<select
-								name="preferredLanguage"
-								value={formData.preferredLanguage}
-								onChange={handleInputChange}
-								className={inputClass}
-							>
-								<option value="en">English</option>
-								<option value="es">Spanish</option>
-							</select>
-						</div>
+					<label className="text-sm text-[#4A2C2A]">🛏 Number of Bedrooms</label>
+					<select
+						name="numBedrooms"
+						value={formData.numBedrooms}
+						onChange={handleInputChange}
+						className={inputClass}
+					>
+						{[1, 2, 3, 4, 5].map((num) => (
+							<option key={num} value={num}>
+								{num > 4 ? `${num}+` : num} Bedroom{num > 1 ? "s" : ""}
+							</option>
+						))}
+					</select>
 
-						<div>
-							<label className="text-sm">
-								🔑 Entry Instructions
-							</label>
-							<textarea
-								name="entryInstructions"
-								value={formData.entryInstructions}
-								onChange={handleInputChange}
-								className={inputClass}
-								rows={2}
-							/>
-						</div>
-					</div>
+					<label className="text-sm text-[#4A2C2A]">
+						🛁 Number of Bathrooms
+					</label>
+					<select
+						name="numBathrooms"
+						value={formData.numBathrooms}
+						onChange={handleInputChange}
+						className={inputClass}
+					>
+						{[1, 2, 3, 4, 5].map((num) => (
+							<option key={num} value={num}>
+								{num > 4 ? `${num}+` : num} Bathroom{num > 1 ? "s" : ""}
+							</option>
+						))}
+					</select>
 
-					<div className="flex items-center gap-2">
-						<span className="text-lg">📸</span>
+					<label className="text-sm text-[#4A2C2A]">
+						🌐 Preferred Language
+					</label>
+					<select
+						name="preferredLanguage"
+						value={formData.preferredLanguage}
+						onChange={handleInputChange}
+						className={inputClass}
+					>
+						<option value="en">English</option>
+						<option value="es">Spanish</option>
+					</select>
+
+					<label className="text-sm text-[#4A2C2A]">
+						🔑 Entry Instructions
+					</label>
+					<textarea
+						name="entryInstructions"
+						value={formData.entryInstructions}
+						onChange={handleInputChange}
+						className={inputClass}
+						rows={2}
+					/>
+
+					<div className="flex gap-3 items-center">
 						<input
 							type="checkbox"
 							name="allowPhotos"
 							checked={formData.allowPhotos}
 							onChange={handleInputChange}
+							className="accent-green-600 size-4 cursor-pointer"
 						/>
-						<label className="text-sm">Allow Service Photos</label>
+						<label className="text-sm text-[#4A2C2A]">
+							📸 Allow Service Photos
+						</label>
 					</div>
 				</div>
 
@@ -409,25 +425,32 @@ export default function BookingForm({ fechas }: BookingFormProps) {
 					for confirmation of your appointment.
 				</p>
 
-				<div className="flex items-start gap-2">
+				<div className="pl-2 flex items-center gap-3">
 					<input
+						id="terms"
 						type="checkbox"
 						name="termsAccepted"
 						checked={formData.termsAccepted}
 						onChange={handleInputChange}
-						className="mt-1"
+						className=" cursor-pointer accent-green-600 size-4"
 						required
 					/>
-					<label className="text-sm text-gray-600">
-						I accept the terms and conditions and privacy policy
+					<label htmlFor="terms" className="text-sm text-[#4A2C2A] leading-snug">
+						I accept the <a href="/terms" className="underline hover:text-[#FBB9B8]">terms and conditions</a> and <a href="/privacy" className="underline hover:text-[#FBB9B8]">privacy policy</a>.
 					</label>
 				</div>
 			</div>
-
+			<div className="text-center text-lg font-semibold text-[#4A2C2A] bg-[#FFF0F2] p-3 rounded shadow">
+				Estimated Price: ${estimatedPrice}
+				<p className="text-sm font-normal text-gray-500 mt-1">
+					Final price may vary based on home condition or additional
+					requirements.
+				</p>
+			</div>
 			<button
 				type="submit"
 				disabled={!fechas || !formData.termsAccepted}
-				className="bg-[#F7CAC9] hover:bg-[#FBB9B8] text-[#4A2C2A] py-2 px-4 rounded mt-2 transition disabled:opacity-50 disabled:cursor-not-allowed"
+				className="cursor-pointer bg-[#F7CAC9] hover:bg-[#FBB9B8] text-[#4A2C2A] py-2 px-4 rounded mt-2 transition disabled:opacity-50 disabled:cursor-not-allowed"
 			>
 				Confirm Booking
 			</button>

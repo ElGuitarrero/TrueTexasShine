@@ -11,13 +11,13 @@ export default function Navbar() {
 			</Link>
 
 			<nav className="hidden md:flex gap-6 text-gray-700 text-lg items-center">
-				<Link href="#services" className="hover:text-[#E75480] transition-all">
+				<Link href="/services" className="hover:text-[#E75480] transition-all">
 					Services
 				</Link>
-				<Link href="#testimonials" className="hover:text-[#E75480] transition-all">
+				<Link href="/testimonials" className="hover:text-[#E75480] transition-all">
 					Testimonials
 				</Link>
-				<Link href="#coverage" className="hover:text-[#E75480] transition-all">
+				<Link href="/coverage" className="hover:text-[#E75480] transition-all">
 					Coverage
 				</Link>
 				<Link href="/calendar">
