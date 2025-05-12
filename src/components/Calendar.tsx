@@ -9,8 +9,12 @@ import {
 	subWeeks,
 	startOfWeek,
 	addMinutes,
-	parseISO
+	getHours,
+
+
+
 } from "date-fns";
+
 import { useState, useEffect } from "react";
 import Swal from "sweetalert2";
 import { useBookingStore } from "@/stores/useBookingStore";
@@ -44,33 +48,42 @@ const WeeklyCalendar = () => {
 	const [currentWeekStart, setCurrentWeekStart] = useState<Date>(new Date());
 	const router = useRouter();
 	const setBooking = useBookingStore((state) => state.setBooking);
-	const weekDates = getWeekDates(currentWeekStart);	
-	const [clienteRepetir, setClienteRepetir] = useState<Booking | null>(null)
+	const weekDates = getWeekDates(currentWeekStart);
+
 
 	useEffect(() => {
 		const fetchBookings = async () => {
-			const { data, error } = await supabase.from("bookings").select("start, end_time");
+			const { data, error } = await supabase
+				.from("bookings")
+				.select("start, end_time");
+
 			if (data) {
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-				const parsed = data.map((b: any) => ({
-					start: parseISO(b.start),
-					end: parseISO(b.end_time),
-				}));
+
+
+
+				const parsed = data.map((b) => {
+
+					const localStart = setHours(b.start, getHours(b.start) - 5)
+					const localEnd = setHours(b.end_time, getHours(b.end_time) - 5)
+
+					console.log(`Start ${localStart} -- End ${localEnd}`)
+
+					return {
+						start: localStart,
+						end: localEnd
+					};
+				});
+
 				setBookings(parsed);
 			}
-			if (error) console.error("Error fetching bookings", error);
+
+			if (error) {
+				console.error("Error fetching bookings", error);
+			}
 		};
-	
+
 		fetchBookings();
-	
-		// 💡 Detecta si viene desde "volver a agendar"
-		const repeatClient = localStorage.getItem("repeatClient");
-		if (repeatClient) {
-			setClienteRepetir(JSON.parse(repeatClient));
-			console.log("Rebooking for client:", JSON.parse(repeatClient));
-			// aquí podrías incluso mostrar un mensaje o preseleccionar algo visual si quieres
-		}
-	}, []);
+	}, [])
 
 	const handleCellClick = (dayIndex: number, hour: number) => {
 		const baseDate = weekDates[dayIndex];
@@ -196,10 +209,10 @@ const WeeklyCalendar = () => {
 			? isFirst && isLast
 				? "rounded-sm"
 				: isFirst
-				? "rounded-t-sm"
-				: isLast
-				? "rounded-b-sm"
-				: ""
+					? "rounded-t-sm"
+					: isLast
+						? "rounded-b-sm"
+						: ""
 			: "";
 
 		const base = "text-center transition-all duration-150 ";
@@ -258,13 +271,13 @@ const WeeklyCalendar = () => {
 									<br />
 									{formatHour(
 										selectedRange.start.getHours() +
-											selectedRange.start.getMinutes() /
-												60
+										selectedRange.start.getMinutes() /
+										60
 									)}{" "}
 									–{" "}
 									{formatHour(
 										selectedRange.end.getHours() +
-											selectedRange.end.getMinutes() / 60
+										selectedRange.end.getMinutes() / 60
 									)}
 								</p>
 							</div>
@@ -281,7 +294,7 @@ const WeeklyCalendar = () => {
 								</button>
 							</div>
 						</>
-					) : (<p>{clienteRepetir ? "Please select the hours that you want us to work " : `Estas reagendando`}</p>)}
+					) : (<p>Please select the hours that you want us to work</p>)}
 				</div>
 			</div>
 		</div>
@@ -301,9 +314,8 @@ const WeeklyCalendar = () => {
 				<div className="flex flex-col md:flex-row gap-5 transition-all duration-300 w-full">
 					{/* Calendario */}
 					<div
-						className={`w-full ${
-							selectedRange ? "md:basis-4/5" : "md:basis-full"
-						}`}
+						className={`w-full ${selectedRange ? "md:basis-4/5" : "md:basis-full"
+							}`}
 					>
 						<div className="overflow-x-auto rounded-lg shadow">
 							<table className="table-auto w-full border-collapse text-xs sm:text-sm">
@@ -328,19 +340,17 @@ const WeeklyCalendar = () => {
 									{slots.map((hour) => (
 										<tr key={hour}>
 											<td
-												className={`text-right px-1 border border-gray-200 text-gray-500 whitespace-nowrap transition-all duration-150 ${
-													weekDates.some((d) =>
-														isHovered(d, hour)
-													)
-														? "bg-[#fdeceb]"
-														: ""
-												} ${
-													weekDates.some((d) =>
+												className={`text-right px-1 border border-gray-200 text-gray-500 whitespace-nowrap transition-all duration-150 ${weekDates.some((d) =>
+													isHovered(d, hour)
+												)
+													? "bg-[#fdeceb]"
+													: ""
+													} ${weekDates.some((d) =>
 														isSelected(d, hour)
 													)
 														? "bg-[#F7CAC9] font-semibold text-black"
 														: ""
-												}`}
+													}`}
 											>
 												{formatHour(hour)}
 											</td>
@@ -400,11 +410,11 @@ const WeeklyCalendar = () => {
 					</div>
 
 					{/* Info seleccionada */}
-					
-						<div className="w-full md:basis-1/5">
-							<InformacionSeleccionada />
-						</div>
-					
+
+					<div className="w-full md:basis-1/5">
+						<InformacionSeleccionada />
+					</div>
+
 				</div>
 			</div>
 		</div>

@@ -1,10 +1,11 @@
 "use client";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { format, isSameDay } from "date-fns";
+import { format, getHours, isSameDay, setHours } from "date-fns";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import Link from "next/link";
+import Swal from "sweetalert2";
 
 export interface Booking {
 	id: string;
@@ -27,28 +28,51 @@ export default function AdminDashboard() {
 	const fetchBookings = async () => {
 		try {
 			const { data } = await supabase
-			.from("bookings")
-			.select(
-				"id, name, phone, service, location, start, end_time, status"
-			)
-			.order("start", { ascending: true });
+				.from("bookings")
+				.select(
+					"id, name, phone, service, location, start, end_time, status"
+				)
+				.order("start", { ascending: true });
 
-		if (data) setBookings(data);
-		
-		setLoading(false);
+			if (data) setBookings(data);
+
+			setLoading(false);
 		} catch (error) {
 			alert(`Hubo un error al cargar los datos ${error}`)
 		}
 	};
 
+
+
 	const markAsCompleted = async (id: string) => {
-		await supabase
+		const result = await Swal.fire({
+			title: "¿Marcar como completado?",
+			text: "¿Estás seguro de que quieres marcar esta reservación como completada?",
+			icon: "question",
+			showCancelButton: true,
+			confirmButtonColor: "#F7CAC9",
+			cancelButtonColor: "#ccc",
+			confirmButtonText: "Sí, marcar",
+			cancelButtonText: "Cancelar",
+		});
+
+		if (!result.isConfirmed) return;
+
+		const { error } = await supabase
 			.from("bookings")
 			.update({ status: "completed" })
 			.eq("id", id);
-		fetchBookings();
-	};
 
+		if (error) {
+			console.error("Error al actualizar:", error.message);
+			Swal.fire("Error", "Hubo un problema al actualizar el estado.", "error");
+			return;
+		}
+
+		await fetchBookings();
+
+		Swal.fire("¡Listo!", "La reservación fue marcada como completada.", "success");
+	};
 	useEffect(() => {
 
 		const savedAuth = localStorage.getItem("admin-auth");
@@ -96,6 +120,15 @@ export default function AdminDashboard() {
 	if (loading) return <p className="text-center p-4">Loading bookings...</p>;
 
 	const dayWithBookings = bookings.map((b) => format(new Date(b.start), "yyyy-MM-dd"))
+	const estatus = {
+		"pending": "Pendiente",
+		"completed": "Completado"
+	}
+	const getStatusStyle = (status: string) => {
+		return status === "completed"
+			? "bg-green-600 text-green-100"
+			: "bg-yellow-300 text-yellow-900";
+	};
 
 	const MostrarInformacion = ({
 		filteredBookings,
@@ -111,10 +144,14 @@ export default function AdminDashboard() {
 				)}
 
 				{filteredBookings.map((b) => {
-					const start = new Date(b.start);
-					const end = new Date(b.end_time);
-					const timeRange = `${format(start, "hh:mm a")} - ${format(
-						end,
+					const startDate = new Date(b.start)
+					const endDate = new Date(b.end_time)
+
+					const localStart = setHours(startDate, getHours(startDate) - 5)
+					const localEnd = setHours(endDate, getHours(endDate) - 5)
+
+					const timeRange = `${format(localStart, "hh:mm a")} - ${format(
+						localEnd,
 						"hh:mm a"
 					)}`;
 
@@ -126,20 +163,16 @@ export default function AdminDashboard() {
 							<div className="flex justify-between text-sm font-semibold">
 								<span>{timeRange}</span>
 								<span
-									className={`text-xs px-2 py-0.5 rounded ${
-										b.status === "completed"
-											? "bg-green-100 text-green-600"
-											: "bg-yellow-100 text-yellow-700"
-									}`}
+									className={`text-xs px-2 py-0.5 rounded ${getStatusStyle(b.status)}`}
 								>
-									{b.status}
+									{estatus[b.status as keyof typeof estatus]}
 								</span>
 							</div>
 
-							<div className="text-sm font-medium">
-								{b.name} {"-"} {b.location}
+							<div className="text-md font-medium">
+								{b.name} {"-"} {b.phone} <br /> {b.location}
 							</div>
-							<div className="text-xs text-[#7A5A59]">
+							<div className="text-sm text-[#7A5A59]">
 								{b.service
 									.split(" ")
 									.map(
@@ -147,23 +180,23 @@ export default function AdminDashboard() {
 											`${item
 												.charAt(0)
 												.toUpperCase()}${item.slice(
-												1
-											)} `
+													1
+												)} `
 									)}
 							</div>
 
 							<div className="flex gap-2">
 								<Link href={`/admin/booking/${b.id}`}>
-									<button className="mt-2 text-xs bg-[#F7CAC9] hover:bg-[#FBB9B8] text-[#4A2C2A] px-3 py-1 rounded self-start transition">
-										Details
+									<button className="cursor-pointer mt-2 text-sm bg-blue-400 hover:bg-blue-500 hover:text-white text-black px-4 py-2 rounded self-start transition">
+										Detalles
 									</button>
 								</Link>
 								{b.status !== "completed" && (
 									<button
 										onClick={() => markAsCompleted(b.id)}
-										className="mt-2 text-xs bg-[#F7CAC9] hover:bg-[#FBB9B8] text-[#4A2C2A] px-3 py-1 rounded self-start transition"
+										className="cursor-pointer mt-2 text-sm bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded self-start transition"
 									>
-										Mark as Done
+										Marcar como completado
 									</button>
 								)}
 							</div>
@@ -191,10 +224,10 @@ export default function AdminDashboard() {
 						className="w-full rounded border border-[#F7CAC9] p-2"
 						tileContent={({ date, view }) =>
 							view === "month" && dayWithBookings.includes(format(date, "yyyy-MM-dd")) ? (
-							  <div className="flex justify-center mt-1">
-								<span className="w-2 h-2 rounded-full bg-[#F7CAC9]"></span>
-							  </div>
-							) : null }
+								<div className="flex justify-center mt-1">
+									<span className="w-2 h-2 rounded-full bg-[#F7CAC9]"></span>
+								</div>
+							) : null}
 					/>
 					{selectedDate && (
 						<p className="mt-2 text-sm text-gray-700">

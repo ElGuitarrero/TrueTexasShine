@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { format } from "date-fns";
+import { format, getHours, setHours } from "date-fns";
 import { Booking } from "@/types/booking";
 import Swal from "sweetalert2";
 
@@ -28,12 +28,35 @@ export default function BookingDetailsPage() {
 	};
 
 	const markAsCompleted = async () => {
-		if (!bookingId) return;
-		await supabase
+		const id = bookingId
+		const result = await Swal.fire({
+			title: "¿Marcar como completado?",
+			text: "¿Estás seguro de que quieres marcar esta reservación como completada?",
+			icon: "question",
+			showCancelButton: true,
+			confirmButtonColor: "#F7CAC9",
+			cancelButtonColor: "#ccc",
+			confirmButtonText: "Sí, marcar",
+			cancelButtonText: "Cancelar",
+		});
+
+		if (!result.isConfirmed) return;
+
+		const { error } = await supabase
 			.from("bookings")
 			.update({ status: "completed" })
-			.eq("id", bookingId);
+			.eq("id", id);
+
+		if (error) {
+			console.error("Error al actualizar:", error.message);
+			Swal.fire("Error", "Hubo un problema al actualizar el estado.", "error");
+			return;
+		}
+
+
 		fetchBooking();
+
+		Swal.fire("¡Listo!", "La reservación fue marcada como completada.", "success");
 	};
 
 	useEffect(() => {
@@ -124,7 +147,11 @@ export default function BookingDetailsPage() {
 			notFound: "Reserva no encontrada.",
 		},
 	}[lang];
+	const startDate = new Date(booking.start)
+	const endDate = new Date(booking.end_time)
 
+	const localStart = setHours(startDate, getHours(startDate) - 5)
+	const localEnd = setHours(endDate, getHours(endDate) - 5)
 
 	return (
 		<div className="max-w-5xl mx-auto p-6 space-y-6 text-[#4A2C2A]">
@@ -235,8 +262,8 @@ export default function BookingDetailsPage() {
 						</p>
 						<p>
 							<strong>{text.time}: </strong>{" "}
-							{booking.start ? format(booking.start, "p") : ""} -{" "}
-							{format(booking.end_time, "p")}
+							{localStart ? format(localStart, "p") : ""} -{" "}
+							{format(localEnd, "p")}
 						</p>
 						<p>
 							<strong>{text.status}:</strong>{" "}
@@ -302,9 +329,9 @@ export default function BookingDetailsPage() {
 				{booking.status !== "completed" && (
 					<button
 						onClick={markAsCompleted}
-						className="bg-[#F7CAC9] hover:bg-[#FBB9B8] text-[#4A2C2A] py-2 px-4 rounded transition shadow"
+						className="cursor-pointer bg-[#F7CAC9] hover:bg-[#FBB9B8] text-[#4A2C2A] py-2 px-4 rounded transition shadow"
 					>
-						✅ Mark as Completed
+						{text.completed}
 					</button>
 				)}
 
