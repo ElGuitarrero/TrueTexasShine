@@ -294,7 +294,7 @@ const WeeklyCalendar = () => {
 								</button>
 							</div>
 						</>
-					) : (<p>Please select the hours that you want us to work</p>)}
+					) : (<p className="text-center"><span className="md:hidden text-xs">On mobile do double click to select the range<br /></span>Please select the hours that you want us to work  </p>)}
 				</div>
 			</div>
 		</div>
