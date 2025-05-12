@@ -58,21 +58,23 @@ export default function BookingForm({ fechas }: BookingFormProps) {
 	});
 
 	const router = useRouter();
+	type Servicio = "deep cleaning" | "consultation" | "office" | "general cleaning";
 
 	function calcularPrecio(
-		tipo: "deep cleaning" | "consultation" | "office" | "general cleaning",
+		tipo: Servicio,
 		cuartos: number,
 		banos: number,
 		hasPets: boolean
 	): number {
-		const base = tipo === "deep cleaning" ? 120 : 90;
-		const extraPorCuarto = tipo === "deep cleaning" ? 20 : 15;
-		const extraPorBano = tipo === "deep cleaning" ? 25 : 20;
-		const extraPorMascota = hasPets ? 30 : 0
+		const tarifas = {
+			"deep cleaning": { base: 120, cuarto: 20, bano: 25 },
+			"default": { base: 90, cuarto: 15, bano: 20 }
+		};
 
-		return (
-			base + (cuartos - 1) * extraPorCuarto + (banos - 1) * extraPorBano + extraPorMascota
-		);
+		const precios = tipo === "deep cleaning" ? tarifas["deep cleaning"] : tarifas["default"];
+		const mascotas = hasPets ? 30 : 0;
+
+		return precios.base + (cuartos - 1) * precios.cuarto + (banos - 1) * precios.bano + mascotas;
 	}
 
 	const estimatedPrice = calcularPrecio(
