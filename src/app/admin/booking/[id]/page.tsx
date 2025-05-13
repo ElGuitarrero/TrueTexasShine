@@ -253,13 +253,13 @@ export default function BookingDetailsPage() {
 
 				</div>
 
-				<div>
+				
+			</div>
+			<div>
 					<BentoBox label={`💵 Precio estimado (por el sistema)`}>
 						<p className="text-xl font-semibold">→ {booking.precio_estimado} USD</p>
 					</BentoBox>
 				</div>
-			</div>
-
 			{/* Actions */}
 			<div className="flex flex-col sm:flex-row gap-4 justify-between mt-6">
 				{booking.status === "completed" && (

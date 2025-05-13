@@ -6,6 +6,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import Swal from "sweetalert2";
 import GooglePlacesInput from "@/components/GooglePlacesInput";
+import addCustomer from "@/services/addCustomer";
+import { Customer } from "@/types/types";
 
 interface BasicBookingInfo {
 	name: string;
@@ -142,6 +144,18 @@ export default function BookingForm({ fechas }: BookingFormProps) {
 				precio_estimado: precioEstimado
 			},
 		]);
+
+		const customer: Customer = {
+			full_name: formData.name,
+			phone: formData.phone,
+			email: formData.email,
+			address: formData.location,
+			notes: "",
+			is_frequent: false,
+			total_services: 0
+		}
+		
+		await addCustomer(customer)
 
 		if (error) {
 			console.error("❌ Error saving booking:", error.message);

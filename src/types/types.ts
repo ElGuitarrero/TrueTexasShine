@@ -11,3 +11,17 @@ export interface CompletedServiceType {
     rating: 1|2|3|4|5
     monto_cobrado: number
 }
+
+
+export interface Customer {
+    id?: string
+    auth_user_id?: string
+    full_name: string
+    phone: number
+    email: string
+    address: string
+    zip_code?: number
+    notes: string
+    is_frequent: boolean
+    total_services: number
+}
