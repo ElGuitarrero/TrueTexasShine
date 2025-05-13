@@ -8,6 +8,8 @@ import Swal from "sweetalert2";
 import GooglePlacesInput from "@/components/GooglePlacesInput";
 import addCustomer from "@/services/addCustomer";
 import { Customer } from "@/types/types";
+import TermsModal from "./terms/TermsModal";
+import PrivacyModal from "./terms/PrivacyModal";
 
 interface BasicBookingInfo {
 	name: string;
@@ -38,7 +40,7 @@ export default function BookingForm({ fechas }: BookingFormProps) {
 	const [formData, setFormData] = useState<
 		BasicBookingInfo &
 		Partial<
-			AdvancedBookingInfo & { colonia?: string; zipcode?: string; monto_cobrado:number }
+			AdvancedBookingInfo & { colonia?: string; zipcode?: string; monto_cobrado: number }
 		>
 	>({
 		name: "",
@@ -115,6 +117,11 @@ export default function BookingForm({ fechas }: BookingFormProps) {
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
+		if (!formData.termsAccepted) {
+			e.preventDefault();
+			// alert("Please accept the terms and privacy policy.");
+			return;
+		  }
 		if (!fechas || !formData.termsAccepted) return;
 
 		// const breakStart = fechas.start
@@ -154,7 +161,7 @@ export default function BookingForm({ fechas }: BookingFormProps) {
 			is_frequent: false,
 			total_services: 0
 		}
-		
+
 		await addCustomer(customer)
 
 		if (error) {
@@ -454,19 +461,28 @@ export default function BookingForm({ fechas }: BookingFormProps) {
 					for confirmation of your appointment.
 				</p>
 
-				<div className="pl-2 flex items-center gap-3">
+				<div className="pl-2 flex items-start gap-3">
 					<input
 						id="terms"
 						type="checkbox"
 						name="termsAccepted"
 						checked={formData.termsAccepted}
 						onChange={handleInputChange}
-						className=" cursor-pointer accent-green-600 size-4"
+						className="cursor-pointer accent-green-600 size-4 mt-1"
 						required
 					/>
-					<label htmlFor="terms" className="text-sm text-[#4A2C2A] leading-snug">
-						I accept the <a href="/terms" className="underline hover:text-[#FBB9B8]">terms and conditions</a> and <a href="/privacy" className="underline hover:text-[#FBB9B8]">privacy policy</a>.
-					</label>
+					<div className="text-sm text-[#4A2C2A] leading-snug">
+						<label htmlFor="terms" className="cursor-pointer select-none">
+							I accept the
+						</label>{" "}
+						<span className="inline">
+							<TermsModal />
+						</span>{" "}
+						and{" "}
+						<span className="inline">
+							<PrivacyModal />
+						</span>.
+					</div>
 				</div>
 			</div>
 			<div className="text-center text-lg font-semibold text-[#4A2C2A] bg-[#FFF0F2] p-3 rounded shadow">

@@ -151,7 +151,7 @@ const WeeklyCalendar = () => {
 			hour % 1 === 0.5 ? 30 : 0
 		);
 
-		const in24h = addHours(new Date(),24)
+		const in24h = addHours(new Date(), 24)
 		return isBefore(time, in24h);
 	};
 
@@ -200,7 +200,8 @@ const WeeklyCalendar = () => {
 		);
 		const end = addMinutes(start, 30);
 
-		const blocked = isBooked(start, end) || isPast(date, hour);
+		const blocked = isBooked(start, end)
+		const past = isPast(date,hour)
 		const active = isSelected(date, hour);
 		const hovering = isHovered(date, hour);
 
@@ -214,19 +215,23 @@ const WeeklyCalendar = () => {
 			? isFirst && isLast
 				? "rounded-sm"
 				: isFirst
-					? "rounded-t-sm"
+					? "rounded-t-sm border-t border-black"
 					: isLast
-						? "rounded-b-sm"
+						? "rounded-b-sm border-b border-black"
 						: ""
 			: "";
 
 		const base = "text-center transition-all duration-150 ";
 
+		if (past && blocked) 
+			return `${base} bg-gray-200/90 text-gray-400 cursor-not-allowed border-x border-gray-300 `
+		if (past) 
+			return `${base} bg-gray-100 text-gray-400 cursor-not-allowed border-x border-gray-300 `
 		if (blocked)
-			return `${base} bg-gray-200 text-gray-400 cursor-not-allowed border-x border-gray-300 `;
+			return `${base} bg-[#F8BBD0] text-gray-400 cursor-not-allowed border-x border-gray-300 `;
 		if (active)
-			return `${base} bg-[#F7CAC9] text-[#4A2C2A] font-semibold ${rounded}`;
-		if (hovering) return `${base} bg-[#fdeceb] text-[#4A2C2A] ${rounded}`;
+			return `${base} z-100 bg-[#C8E6C9] text-[#4A2C2A] font-semibold ${rounded}`;
+		if (hovering) return `${base} bg-[#E3F2FD] text-[#4A2C2A] ${rounded}`;
 
 		return `${base} text-gray-700 hover:bg-pink-50`;
 	};
@@ -315,7 +320,7 @@ const WeeklyCalendar = () => {
 			{/* Columna 1 */}
 			<div className="flex flex-col w-full">
 				<ControlesSemanales />
-
+				<p className="text-center text-xs mb-2 md:hidden">On mobile, double tap a time slot until the selected range turns green.</p>
 				<div className="flex flex-col md:flex-row gap-5 transition-all duration-300 w-full">
 					{/* Calendario */}
 					<div
@@ -348,12 +353,12 @@ const WeeklyCalendar = () => {
 												className={`text-right px-1 border border-gray-200 text-gray-500 whitespace-nowrap transition-all duration-150 ${weekDates.some((d) =>
 													isHovered(d, hour)
 												)
-													? "bg-[#fdeceb]"
+													? "bg-[#E3F2FD]"
 													: ""
 													} ${weekDates.some((d) =>
 														isSelected(d, hour)
 													)
-														? "bg-[#F7CAC9] font-semibold text-black"
+														? "bg-[#C8E6C9] font-semibold text-black"
 														: ""
 													}`}
 											>
