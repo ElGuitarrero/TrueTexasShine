@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { format, getHours, setHours } from "date-fns";
 import { Booking } from "@/types/booking";
 import Swal from "sweetalert2";
+import CompletedService from "@/components/CompletedService";
 
 export default function BookingDetailsPage() {
 	const router = useRouter();
@@ -12,6 +13,7 @@ export default function BookingDetailsPage() {
 	const bookingId = params?.id;
 	const [lang, setLang] = useState<"en" | "es">("es");
 
+	const [completar, setCompletar] = useState<Booking | null>()
 	const [booking, setBooking] = useState<Booking>();
 	const [loading, setLoading] = useState(true);
 
@@ -27,37 +29,6 @@ export default function BookingDetailsPage() {
 		setLoading(false);
 	};
 
-	const markAsCompleted = async () => {
-		const id = bookingId
-		const result = await Swal.fire({
-			title: "¿Marcar como completado?",
-			text: "¿Estás seguro de que quieres marcar esta reservación como completada?",
-			icon: "question",
-			showCancelButton: true,
-			confirmButtonColor: "#F7CAC9",
-			cancelButtonColor: "#ccc",
-			confirmButtonText: "Sí, marcar",
-			cancelButtonText: "Cancelar",
-		});
-
-		if (!result.isConfirmed) return;
-
-		const { error } = await supabase
-			.from("bookings")
-			.update({ status: "completed" })
-			.eq("id", id);
-
-		if (error) {
-			console.error("Error al actualizar:", error.message);
-			Swal.fire("Error", "Hubo un problema al actualizar el estado.", "error");
-			return;
-		}
-
-
-		fetchBooking();
-
-		Swal.fire("¡Listo!", "La reservación fue marcada como completada.", "success");
-	};
 
 	useEffect(() => {
 		fetchBooking();
@@ -278,6 +249,14 @@ export default function BookingDetailsPage() {
 							</span>
 						</p>
 					</BentoBox>
+
+
+				</div>
+
+				<div>
+					<BentoBox label={`💵 Precio estimado (por el sistema)`}>
+						<p className="text-xl font-semibold">→ {booking.precio_estimado} USD</p>
+					</BentoBox>
 				</div>
 			</div>
 
@@ -328,12 +307,16 @@ export default function BookingDetailsPage() {
 
 				{booking.status !== "completed" && (
 					<button
-						onClick={markAsCompleted}
+						onClick={() => setCompletar(booking)}
 						className="cursor-pointer bg-[#F7CAC9] hover:bg-[#FBB9B8] text-[#4A2C2A] py-2 px-4 rounded transition shadow"
 					>
 						{text.completed}
 					</button>
 				)}
+
+				{/* <button onClick={() => setCompletar(booking)}>HOLA</button> */}
+				{completar && <CompletedService booking={booking} setBooking={() => setCompletar(null)} fetchBooking={fetchBooking} />}
+
 
 				<button
 					onClick={() => router.back()}

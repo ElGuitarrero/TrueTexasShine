@@ -2,7 +2,7 @@
 
 "use client";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import Swal from "sweetalert2";
 import GooglePlacesInput from "@/components/GooglePlacesInput";
@@ -36,7 +36,7 @@ export default function BookingForm({ fechas }: BookingFormProps) {
 	const [formData, setFormData] = useState<
 		BasicBookingInfo &
 		Partial<
-			AdvancedBookingInfo & { colonia?: string; zipcode?: string }
+			AdvancedBookingInfo & { colonia?: string; zipcode?: string; monto_cobrado:number }
 		>
 	>({
 		name: "",
@@ -56,6 +56,7 @@ export default function BookingForm({ fechas }: BookingFormProps) {
 		colonia: "",
 		zipcode: "",
 	});
+	const [precioEstimado, setPrecioEstimado] = useState(0)
 
 	const router = useRouter();
 	type Servicio = "deep cleaning" | "consultation" | "office" | "general cleaning";
@@ -74,16 +75,27 @@ export default function BookingForm({ fechas }: BookingFormProps) {
 		const precios = tipo === "deep cleaning" ? tarifas["deep cleaning"] : tarifas["default"];
 		const mascotas = hasPets ? 30 : 0;
 
-		return precios.base + (cuartos - 1) * precios.cuarto + (banos - 1) * precios.bano + mascotas;
+		const precio = precios.base + (cuartos - 1) * precios.cuarto + (banos - 1) * precios.bano + mascotas;
+
+		return precio
 	}
 
-	const estimatedPrice = calcularPrecio(
+	useEffect(() => {
+		const nuevoPrecio = calcularPrecio(
+			formData.service,
+			formData.numBedrooms ?? 1,
+			formData.numBathrooms ?? 1,
+			formData.hasPets ?? false
+		);
+		setPrecioEstimado(nuevoPrecio);
+	}, [
 		formData.service,
-		formData.numBedrooms ?? 1,
-		formData.numBathrooms ?? 1,
-		formData.hasPets ?? false
-	);
+		formData.numBedrooms,
+		formData.numBathrooms,
+		formData.hasPets,
+	]);
 
+	const estimatedPrice = precioEstimado
 	const handleInputChange = (
 		e: React.ChangeEvent<
 			HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -127,6 +139,7 @@ export default function BookingForm({ fechas }: BookingFormProps) {
 				status: "pending",
 				colonia: formData.colonia,
 				zipcode: formData.zipcode,
+				precio_estimado: precioEstimado
 			},
 		]);
 

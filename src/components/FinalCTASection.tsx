@@ -11,7 +11,7 @@ export default function FinalCTASection() {
           Let us bring the shine and southern charm right to your doorstep. Book your cleaning with True Texas Shine today!
         </p>
         <Link href="/calendar">
-          <button className="px-8 py-4 bg-[#4A2C2A] text-white text-lg font-medium rounded-xl shadow hover:bg-[#341b1a] transition-all">
+          <button className="cursor-pointer px-8 py-4 bg-[#4A2C2A] text-white text-lg font-medium rounded-xl shadow hover:bg-[#341b1a] transition-all">
             Schedule Your Appointment
           </button>
         </Link>

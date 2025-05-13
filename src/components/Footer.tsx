@@ -14,7 +14,7 @@ export default function Footer() {
 					<ul>
 						<li>📍 Richmond, TX</li>
 						<li>📞 (123) 456-7890</li>
-						<li>✉️ info@truetexasshine.com</li>
+						<li>✉️ <a href="mailto:info@truetexashine.com">info@truetexashine.com</a></li>
 					</ul>
 				</div>
 

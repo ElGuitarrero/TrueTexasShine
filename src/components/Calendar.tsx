@@ -10,6 +10,7 @@ import {
 	startOfWeek,
 	addMinutes,
 	getHours,
+	addHours,
 
 
 
@@ -38,7 +39,7 @@ const formatHour = (hour: number) => {
 
 const getWeekDates = (startDate: Date) => {
 	const start = startOfWeek(startDate, { weekStartsOn: 1 });
-	return Array.from({ length: 6 }, (_, i) => new Date(start.getFullYear(), start.getMonth(), start.getDate() + i));
+	return Array.from({ length: 5 }, (_, i) => new Date(start.getFullYear(), start.getMonth(), start.getDate() + i));
 };
 
 const WeeklyCalendar = () => {
@@ -55,7 +56,8 @@ const WeeklyCalendar = () => {
 		const fetchBookings = async () => {
 			const { data, error } = await supabase
 				.from("bookings")
-				.select("start, end_time");
+				.select("start, end_time")
+				.eq("status", "pending");
 
 			if (data) {
 
@@ -106,8 +108,8 @@ const WeeklyCalendar = () => {
 
 		if (isPast(start, hour)) {
 			Swal.fire({
-				title: "This time has already passed",
-				text: "You can't book a slot in the past. Please choose a future time.",
+				title: "Invalid timeslot ",
+				text: "You can't book a slot in the past or in the next 24 hours, Please choose a future time.",
 				icon: "error",
 				iconColor: "oklch(59.2% .249 .584)",
 				confirmButtonText: "Got it",
@@ -148,8 +150,11 @@ const WeeklyCalendar = () => {
 			setHours(date, Math.floor(hour)),
 			hour % 1 === 0.5 ? 30 : 0
 		);
-		return isBefore(time, new Date());
+
+		const in24h = addHours(new Date(),24)
+		return isBefore(time, in24h);
 	};
+
 
 	const isBooked = (start: Date, end: Date) => {
 		return bookings.some(

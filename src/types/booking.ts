@@ -27,4 +27,5 @@ export interface Booking {
 
   status: BookingStatus;
   createdAt: Date;
+  precio_estimado: number
 }
