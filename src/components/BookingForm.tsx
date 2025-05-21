@@ -9,7 +9,9 @@ import GooglePlacesInput from "@/components/GooglePlacesInput";
 import addCustomer from "@/services/addCustomer";
 import { Customer } from "@/types/types";
 import TermsModal from "./terms/TermsModal";
+import axios from 'axios'
 import PrivacyModal from "./terms/PrivacyModal";
+import { format } from "date-fns";
 
 interface BasicBookingInfo {
 	name: string;
@@ -121,7 +123,7 @@ export default function BookingForm({ fechas }: BookingFormProps) {
 			e.preventDefault();
 			// alert("Please accept the terms and privacy policy.");
 			return;
-		  }
+		}
 		if (!fechas || !formData.termsAccepted) return;
 
 		// const breakStart = fechas.start
@@ -175,6 +177,9 @@ export default function BookingForm({ fechas }: BookingFormProps) {
 			return;
 		}
 
+
+
+
 		Swal.fire({
 			icon: "success",
 			title: "Appointment Requested",
@@ -183,6 +188,18 @@ export default function BookingForm({ fechas }: BookingFormProps) {
 		}).then(() => {
 			router.push("/"); // o a una página de confirmación
 		});
+
+		try {
+			await axios.post("/api/correos", {
+				name: formData.name,
+				email: formData.email,
+				fecha: format(fechas.start, "MMM/dd"),
+				precio_estimado: precioEstimado,
+				direccion: formData.location
+			})
+		} catch (error) {
+			console.error("No se pudo mandar el correo" + error)
+		}
 
 		// console.log(data);
 	};

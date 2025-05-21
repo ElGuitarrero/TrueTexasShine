@@ -118,6 +118,7 @@ export default function BookingDetailsPage() {
 			notFound: "Reserva no encontrada.",
 		},
 	}[lang];
+
 	const startDate = new Date(booking.start)
 	const endDate = new Date(booking.end_time)
 
@@ -197,7 +198,7 @@ export default function BookingDetailsPage() {
 				<div className="space-y-4 flex flex-col justify-between">
 					<BentoBox label={text.location}>
 						<p>
-							<strong>{text.address}:</strong> {booking.location}
+							<strong>{text.address}:</strong> <a target="_blank" href={`https://maps.google.com/?q=${booking.location}`} style={{color: "blue"}}>{booking.location}</a>
 						</p>
 						{booking.colonia ? (
 							<p>
@@ -330,13 +331,7 @@ export default function BookingDetailsPage() {
 }
 
 // Reusable Box
-function BentoBox({
-	label,
-	children,
-}: {
-	label: string;
-	children: React.ReactNode;
-}) {
+function BentoBox({label,children,}: {label: string; children: React.ReactNode;}) {
 	return (
 		<div className="bg-[#fff6f8] border border-[#F7CAC9] p-4 rounded-lg shadow-sm">
 			<h3 className="font-bold mb-2">{label}</h3>
